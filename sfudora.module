@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Module used to house customizations for Simon Fraser University.
+ */
+
+/**
+ * Implements hook_islandora_required_objects().
+ */
+function sfudora_islandora_required_objects(IslandoraTuque $connection) {
+  $module_path = drupal_get_path('module', 'sfudora');
+
+  // SFU Generic Content Model.
+  $generic_cmodel = $connection->repository->constructObject('sfu:genericCModel');
+  $generic_cmodel->owner = 'fedoraAdmin';
+  $generic_cmodel->label = 'Generic file content model for Simon Fraser University';
+  $generic_cmodel->models = 'fedora-system:ContentModel-3.0';
+  $datastream = $generic_cmodel->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'text/xml';
+  $datastream->setContentFromFile("$module_path/data/datastreams/generic_CModel/DS-COMPOSITE-MODEL.xml", FALSE);
+  $generic_cmodel->ingestDatastream($datastream);
+
+  return array(
+    'sfudora' => array(
+      'title' => 'Simon Fraser University',
+      'objects' => array(
+        $generic_cmodel,
+      ),
+    ),
+  );
+}

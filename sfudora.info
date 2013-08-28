@@ -1,0 +1,6 @@
+name = SFUdora
+description = Customizations for Simon Fraser University.
+dependencies[] = islandora
+package = Islandora
+version = 7.x-dev
+core = 7.x
