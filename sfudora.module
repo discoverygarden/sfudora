@@ -5,6 +5,8 @@
  * Module used to house customizations for Simon Fraser University.
  */
 
+define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
+
 /**
  * Implements hook_islandora_required_objects().
  */
@@ -30,4 +32,21 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
       ),
     ),
   );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sfudora_menu() {
+  $items = array();
+
+  $items[SFUDORA_INGEST_PATH] = array(
+    'title' => 'SFU ingest callback',
+    'access callback' => TRUE,
+    'page callback' => 'sfudora_ajaxplorer_ingest',
+    'file' => 'includes/ajaxplorer_ingest.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
 }
