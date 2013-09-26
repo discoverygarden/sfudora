@@ -27,6 +27,9 @@ function sfudora_ajaxplorer_ingest() {
   parse_str($params['download_query_params'], $qp);
   $params['download_query_params'] = $qp;
 
+  // XXX: Start content region only hack. Hide ALL elements, except those
+  // related to the content... Try to prevent people from hitting other links on
+  // the site.
   $js = <<<EOJS
   jQuery(document).ready(function() {
     to_show = jQuery('#block-system-main, #block-system-main *').parentsUntil('body').andSelf();
@@ -48,7 +51,7 @@ EOCSS;
     'type' => 'inline',
     'preprocess' => FALSE,
   ));
-
+  // XXX: End content region only hack.
   return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
 }
 
