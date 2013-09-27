@@ -126,6 +126,16 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
   if ($form_state['values']['restrict_options'] == 'embargo' && $form_state['values']['embargo_duration'] == 'finite') {
     if ($parsed <= $time_now) {
       form_set_error('embargo_date', t('You cannot specify a date in the past!'));
+      $newembargo = array();
+      foreach ($form['embargo'] as $key => $value) {
+        $newembargo[$key] = $value;
+        if ($key == 'embargo_date') {
+          $newembargo['error_message'] = array(
+            "#markup" => t('You cannot specify a date in the past!'),
+          );
+        }
+      }
+      $form['embargo'] = $newembargo;
     }
   }
 }
