@@ -11,15 +11,17 @@ define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
  * Implements hook_menu().
  */
 function sfudora_menu() {
-  // We don't use the access callback for any of the REST end-poinst as we can't
-  // reliably return JSON from that point.
-  return array(
-    "sfu/ajaxplorer/ingest/%" => array(
-      'page callback' => 'sfudora_ingest',
-      'access callback' => TRUE,
-      'type' => MENU_CALLBACK,
-    ),
+  $items = array();
+
+  $items[SFUDORA_INGEST_PATH] = array(
+    'title' => 'SFU ingest callback',
+    'access callback' => TRUE,
+    'page callback' => 'sfudora_ajaxplorer_ingest',
+    'file' => 'includes/ajaxplorer_ingest.inc',
+    'type' => MENU_CALLBACK,
   );
+
+  return $items;
 }
 
 /**
@@ -48,21 +50,3 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   );
 }
-
-/**
- * Implements hook_menu().
- */
-function sfudora_menu() {
-  $items = array();
-
-  $items[SFUDORA_INGEST_PATH] = array(
-    'title' => 'SFU ingest callback',
-    'access callback' => TRUE,
-    'page callback' => 'sfudora_ajaxplorer_ingest',
-    'file' => 'includes/ajaxplorer_ingest.inc',
-    'type' => MENU_CALLBACK,
-  );
-
-  return $items;
-}
-
