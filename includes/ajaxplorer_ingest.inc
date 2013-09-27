@@ -108,6 +108,28 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     ),
     '#default_value' => FALSE,
   );
+
+  // Choose xacml.
+  $xacml_path = drupal_get_path('module', 'sfudora') . SFUDORA_XACML_FOLDER;
+  $xacmls = file_scan_directory($xacml_path, '/.*\.xml$/');
+
+  $options = array();
+  foreach ($xacmls as $xacml) {
+    $value = $xacml->name;
+    $key = drupal_realpath($xacml->uri);
+    $options[$key] = $value;
+  }
+
+  $form['xacml'] = array(
+    '#type' => 'select',
+    '#title' => 'select xacml file',
+    '#options' => $options,
+    '#states' => array(
+      'visible' => array(
+        ':input[name=restrict_options]' => array('value' => 'xacml'),
+      ),
+    ),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Ingest'),
@@ -151,6 +173,11 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     }
     sfudora_ajaxplorer_ingest_set_embargo($objects, $embargo_date);
   }
+
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'xacml') {
+    sfudora_ajaxplorer_ingest_set_xacml($objects, $form_state['values']['xacml']);
+  }
 }
 
 /**
@@ -165,5 +192,29 @@ function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
   module_load_include('inc', 'islandora_scholar_embargo');
   foreach ($objects as $object) {
     islandora_scholar_embargo_set_embargo($object, NULL, $end);
+  }
+}
+
+/**
+ * Add the xacml to an object.
+ * 
+ * @param string|AbstractObject $objects
+ *   The object (or its pid) that the xacml should be added to
+ * @param string $xacml
+ *   The real path pf the xacml file.
+ */
+function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
+  module_load_include('module', 'islandora');
+  foreach ($objects as $object) {
+    if (is_string($object)) {
+      $object = islandora_object_load($object);
+    }
+    $xacml_ds = new IslandoraNewFedoraDatastream('POLICY', 'X', $object, $object->repository);
+    $xacml_ds->setContentFromFile($xacml);
+    $xacml_ds->label = "XACML Policy Stream";
+    if ($object->getDatastream('POLICY')) {
+      $object->purgeDatastream('POLICY');
+    }
+    $object->ingestDatastream($xacml_ds);
   }
 }
