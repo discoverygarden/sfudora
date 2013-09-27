@@ -68,6 +68,50 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#markup' => t('Blahblahblah'),
   );
 
+  $form['restrict_options'] = array(
+    '#type' => 'radios',
+    '#title' => t("Is this publication restricted?"),
+    '#options' => array(
+      'not_restricted' => t("no restriction"),
+      'embargo' => t('use embargo'),
+      'xacml' => t('use xacml'),
+    ),
+  );
+
+  $form['embargo'] = array(
+    '#type' => 'item',
+    '#states' => array(
+      'visible' => array(
+        ':input[name=restrict_options]' => array('value' => 'embargo'),
+      ),
+    ),
+  );
+
+  $form['embargo']['embargo_duration'] = array(
+    '#type' => 'radios',
+    '#title' => t('Duration of Embargo'),
+    '#options' => array(
+      'indefinite' => t('Embargo indefinitely (must be lifted manually)'),
+      'finite' => t('Embargo until date specified'),
+    ),
+    '#default_value' => 'indefinite',
+  );
+  $form['embargo']['embargo_date'] = array(
+    '#type' => 'datepicker',
+    '#title' => 'Embargo date',
+    '#description' => 'The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)',
+    '#states' => array(
+      'visible' => array(
+        ':input[name=embargo_duration]' => array('value' => 'finite'),
+        ':input[name=restrict_options]' => array('value' => 'embargo'),
+      ),
+    ),
+    '#default_value' => FALSE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Ingest'),
+  );
   return $form;
 }
 
@@ -76,6 +120,14 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
  */
 function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
   // TODO: Do the XML Form validation stuffs...
+  $date = $form_state['values']['embargo_date'];
+  $time_now = time();
+  $parsed = strtotime($date);
+  if ($form_state['values']['restrict_options'] == 'embargo' && $form_state['values']['embargo_duration'] == 'finite') {
+    if ($parsed <= $time_now) {
+      form_set_error('embargo_date', t('You cannot specify a date in the past!'));
+    }
+  }
 }
 
 /**
@@ -85,4 +137,33 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: Do the XML form validation stuff to get the output XML.
   // TODO: Actually create objects... If we're a folder, download the ZIP,
   // iterate over all the contents, creating objects as necessary.
+  // add embargo to this object
+  // $objects = array("islandora:3");
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'embargo') {
+    if (isset($form_state['values']['embargo_date']) &&
+        isset($form_state['values']['embargo_duration']) &&
+        $form_state['values']['embargo_duration'] == 'finite') {
+      $embargo_date = $form_state['values']['embargo_date'];
+    }
+    else {
+      $embargo_date = "indefinite";
+    }
+    sfudora_ajaxplorer_ingest_set_embargo($objects, $embargo_date);
+  }
+}
+
+/**
+ * Set embargo of the object.
+ * 
+ * @param AbstractObject|string $objects
+ *   The object or the pid of the object.
+ * @param string $end
+ *   The expire date (yyyy-mm-dd).
+ */
+function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
+  module_load_include('inc', 'islandora_scholar_embargo');
+  foreach ($objects as $object) {
+    islandora_scholar_embargo_set_embargo($object, NULL, $end);
+  }
 }
