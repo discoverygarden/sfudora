@@ -71,10 +71,11 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   $form['restrict_options'] = array(
     '#type' => 'radios',
     '#title' => t("Is this publication restricted?"),
+    '#default_value' => 'not_restricted',
     '#options' => array(
-      'not_restricted' => t("no restriction"),
-      'embargo' => t('use embargo'),
-      'xacml' => t('use xacml'),
+      'not_restricted' => t("No restriction"),
+      'embargo' => t('Use embargo'),
+      'xacml' => t('Use xacml'),
     ),
   );
 
@@ -90,6 +91,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   $form['embargo']['embargo_duration'] = array(
     '#type' => 'radios',
     '#title' => t('Duration of Embargo'),
+    '#default_value' => 'indefinite',
     '#options' => array(
       'indefinite' => t('Embargo indefinitely (must be lifted manually)'),
       'finite' => t('Embargo until date specified'),
@@ -98,8 +100,8 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   );
   $form['embargo']['embargo_date'] = array(
     '#type' => 'datepicker',
-    '#title' => 'Embargo date',
-    '#description' => 'The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)',
+    '#title' => t('Embargo date'),
+    '#description' => t('The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)'),
     '#states' => array(
       'visible' => array(
         ':input[name=embargo_duration]' => array('value' => 'finite'),
@@ -122,7 +124,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
 
   $form['xacml'] = array(
     '#type' => 'select',
-    '#title' => 'select xacml file',
+    '#title' => t('Select xacml file'),
     '#options' => $options,
     '#states' => array(
       'visible' => array(
