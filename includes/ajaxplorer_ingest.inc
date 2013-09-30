@@ -68,6 +68,74 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#markup' => t('Blahblahblah'),
   );
 
+  $form['restrict_options'] = array(
+    '#type' => 'radios',
+    '#title' => t("Is this publication restricted?"),
+    '#default_value' => 'not_restricted',
+    '#options' => array(
+      'not_restricted' => t("No restriction"),
+      'embargo' => t('Use embargo'),
+      'xacml' => t('Use XACML'),
+    ),
+  );
+
+  $form['embargo'] = array(
+    '#type' => 'item',
+    '#states' => array(
+      'visible' => array(
+        ':input[name=restrict_options]' => array('value' => 'embargo'),
+      ),
+    ),
+  );
+
+  $form['embargo']['embargo_duration'] = array(
+    '#type' => 'radios',
+    '#title' => t('Duration of Embargo'),
+    '#default_value' => 'indefinite',
+    '#options' => array(
+      'indefinite' => t('Embargo indefinitely (must be lifted manually)'),
+      'finite' => t('Embargo until date specified'),
+    ),
+    '#default_value' => 'indefinite',
+  );
+  $form['embargo']['embargo_date'] = array(
+    '#type' => 'datepicker',
+    '#title' => t('Embargo date'),
+    '#description' => t('The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name=embargo_duration]' => array('value' => 'finite'),
+        ':input[name=restrict_options]' => array('value' => 'embargo'),
+      ),
+    ),
+    '#default_value' => FALSE,
+  );
+
+  // Choose xacml.
+  $xacml_path = drupal_get_path('module', 'sfudora') . SFUDORA_XACML_FOLDER;
+  $xacmls = file_scan_directory($xacml_path, '/.*\.xml$/');
+
+  $options = array();
+  foreach ($xacmls as $xacml) {
+    $value = $xacml->name;
+    $key = drupal_realpath($xacml->uri);
+    $options[$key] = $value;
+  }
+
+  $form['xacml'] = array(
+    '#type' => 'select',
+    '#title' => t('Select XACML file'),
+    '#options' => $options,
+    '#states' => array(
+      'visible' => array(
+        ':input[name=restrict_options]' => array('value' => 'xacml'),
+      ),
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Ingest'),
+  );
   return $form;
 }
 
@@ -76,6 +144,24 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
  */
 function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
   // TODO: Do the XML Form validation stuffs...
+  $date = $form_state['values']['embargo_date'];
+  $time_now = time();
+  $parsed = strtotime($date);
+  if ($form_state['values']['restrict_options'] == 'embargo' && $form_state['values']['embargo_duration'] == 'finite') {
+    if ($parsed <= $time_now) {
+      form_set_error('embargo_date', t('You cannot specify a date in the past!'));
+      $newembargo = array();
+      foreach ($form['embargo'] as $key => $value) {
+        $newembargo[$key] = $value;
+        if ($key == 'embargo_date') {
+          $newembargo['error_message'] = array(
+            "#markup" => t('You cannot specify a date in the past!'),
+          );
+        }
+      }
+      $form['embargo'] = $newembargo;
+    }
+  }
 }
 
 /**
@@ -85,4 +171,61 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: Do the XML form validation stuff to get the output XML.
   // TODO: Actually create objects... If we're a folder, download the ZIP,
   // iterate over all the contents, creating objects as necessary.
+  // add embargo to this object
+  // $objects = array("islandora:3");
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'embargo') {
+    if (isset($form_state['values']['embargo_date']) &&
+        isset($form_state['values']['embargo_duration']) &&
+        $form_state['values']['embargo_duration'] == 'finite') {
+      $embargo_date = $form_state['values']['embargo_date'];
+    }
+    else {
+      $embargo_date = "indefinite";
+    }
+    sfudora_ajaxplorer_ingest_set_embargo($objects, $embargo_date);
+  }
+
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'xacml') {
+    sfudora_ajaxplorer_ingest_set_xacml($objects, $form_state['values']['xacml']);
+  }
+}
+
+/**
+ * Set embargo of the object.
+ * 
+ * @param AbstractObject|string $objects
+ *   The object or the pid of the object.
+ * @param string $end
+ *   The expire date (yyyy-mm-dd).
+ */
+function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
+  module_load_include('inc', 'islandora_scholar_embargo');
+  foreach ($objects as $object) {
+    islandora_scholar_embargo_set_embargo($object, NULL, $end);
+  }
+}
+
+/**
+ * Add the xacml to an object.
+ * 
+ * @param string|AbstractObject $objects
+ *   The object (or its pid) that the xacml should be added to
+ * @param string $xacml
+ *   The real path pf the xacml file.
+ */
+function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
+  foreach ($objects as $object) {
+    if (is_string($object)) {
+      $object = islandora_object_load($object);
+    }
+    $xacml_ds = $object->constructDatastream('POLICY', 'X');
+    $xacml_ds->setContentFromFile($xacml);
+    $xacml_ds->label = "XACML Policy Stream";
+    if ($object->getDatastream('POLICY')) {
+      $object->purgeDatastream('POLICY');
+    }
+    $object->ingestDatastream($xacml_ds);
+  }
 }
