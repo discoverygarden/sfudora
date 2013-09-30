@@ -61,15 +61,28 @@ EOCSS;
 function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   form_load_include($form_state, 'inc', 'sfudora', 'includes/ajaxplorer_ingest');
 
-  // TODO: Get our DDI XML form, dump it into $form.
-  $form['dummy'] = array(
-    '#type' => 'item',
-    '#title' => t('Dummy "field"'),
-    '#markup' => t('Blahblahblah'),
+  $download_url = url($params['download_base_url'], array(
+    'query' => $params['download_query_params'],
+    'absolute' => TRUE,
+  ));
+
+  $form_state['storage']['download_url'] = $download_url;
+  $module_path = drupal_get_path('module', 'islandora_basic_image');
+
+  $form_name = "Basic image MODS form";
+  $xml = file_get_contents("$module_path/xml/islandora_basic_image_form_mods.xml");
+
+  $form = xml_form_builder_get_form($form, $form_state, $form_name, $xml);
+
+  // Set a specific callback for the submit button.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
   );
 
   return $form;
 }
+
 
 /**
  * Form validation function.
@@ -85,4 +98,46 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: Do the XML form validation stuff to get the output XML.
   // TODO: Actually create objects... If we're a folder, download the ZIP,
   // iterate over all the contents, creating objects as necessary.
+  // We need to determine if single or folder ingest.
+  // We need to determine if object is generic based on file type.
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $content_model = 'sfu:genericCModel';
+  $parent_collection = 'islandora:root';
+
+  // Need to change this to be the metadata title.
+  $title = 'test';
+  $new_object = islandora_prepare_new_object("test", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+
+  $obj_label = 'Generic Record';
+  $obj_mimetype = 'image/jpeg';
+
+  // Create the MODS datastream.
+  $obj_ds = $new_object->constructDatastream('OBJ', 'M');
+  $obj_ds->label = $obj_label;
+  $obj_ds->mimeType = $obj_mimetype;
+  $obj_ds->setContentFromUrl($form_state['storage']['download_url']);
+  $new_object->ingestDatastream($obj_ds);
+
+  // Create the MODS datastream.
+  $ddi_metadata = sfudora_ajaxplorer_ingest_create_metadata($form, $form_state);
+  $ddi_ds = $new_object->constructDatastream('DDI', 'M');
+  $ddi_ds->label = 'DDI Record';
+  $ddi_ds->mimeType = 'text/xml';
+  $ddi_ds->setContentFromString($ddi_metadata);
+  $new_object->ingestDatastream($ddi_ds);
+
+  // Store the object.
+  islandora_add_object($new_object);
+  drupal_goto('islandora/object/islandora:root');
+
+}
+
+
+/**
+ * Function to create ddi metadata from form.
+ */
+function sfudora_ajaxplorer_ingest_create_metadata(&$form, &$form_state) {
+
+  return '';
+
 }
