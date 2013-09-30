@@ -75,7 +75,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#options' => array(
       'not_restricted' => t("No restriction"),
       'embargo' => t('Use embargo'),
-      'xacml' => t('Use xacml'),
+      'xacml' => t('Use XACML'),
     ),
   );
 
@@ -124,7 +124,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
 
   $form['xacml'] = array(
     '#type' => 'select',
-    '#title' => t('Select xacml file'),
+    '#title' => t('Select XACML file'),
     '#options' => $options,
     '#states' => array(
       'visible' => array(
@@ -150,6 +150,16 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
   if ($form_state['values']['restrict_options'] == 'embargo' && $form_state['values']['embargo_duration'] == 'finite') {
     if ($parsed <= $time_now) {
       form_set_error('embargo_date', t('You cannot specify a date in the past!'));
+      $newembargo = array();
+      foreach ($form['embargo'] as $key => $value) {
+        $newembargo[$key] = $value;
+        if ($key == 'embargo_date') {
+          $newembargo['error_message'] = array(
+            "#markup" => t('You cannot specify a date in the past!'),
+          );
+        }
+      }
+      $form['embargo'] = $newembargo;
     }
   }
 }
@@ -206,12 +216,11 @@ function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
  *   The real path pf the xacml file.
  */
 function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
-  module_load_include('module', 'islandora');
   foreach ($objects as $object) {
     if (is_string($object)) {
       $object = islandora_object_load($object);
     }
-    $xacml_ds = new IslandoraNewFedoraDatastream('POLICY', 'X', $object, $object->repository);
+    $xacml_ds = $object->constructDatastream('POLICY', 'X');
     $xacml_ds->setContentFromFile($xacml);
     $xacml_ds->label = "XACML Policy Stream";
     if ($object->getDatastream('POLICY')) {
