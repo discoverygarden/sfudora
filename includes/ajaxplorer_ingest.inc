@@ -70,7 +70,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   $module_path = drupal_get_path('module', 'islandora_basic_image');
 
   $form_name = "Basic image MODS form";
-  $form = xml_form_builder_get_form($form, $form_state, $form_name);
+  $form['ddi'] = xml_form_builder_get_form($form, $form_state, $form_name);
 
   $form['restrict_options'] = array(
     '#type' => 'radios',
@@ -179,29 +179,27 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // iterate over all the contents, creating objects as necessary.
   // TODO: We need to determine if single or folder ingest.
   // TODO: We need to determine if object is generic based on file type.
-  module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'sfu:genericCModel';
   $parent_collection = 'islandora:root';
 
   // Need to change this to be the metadata title.
-  $title = 'test';
-  $new_object = islandora_prepare_new_object("test", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+  $title = $form_state['values']['ddi']['titleInfo']['title'];
+  $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
 
   $obj_label = 'Generic Record';
   $obj_mimetype = 'image/jpeg';
 
-  // Create the MODS datastream.
+  // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
   $obj_ds->label = $obj_label;
   $obj_ds->mimeType = $obj_mimetype;
-  $obj_ds->setContentFromUrl($form_state['storage']['download_url']);
+  $obj_ds->setContentFromString(sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']));
   $new_object->ingestDatastream($obj_ds);
 
   // Create the DDI datastream.
   $xml_form = new XMLForm($form_state);
   $ddi_doc = $xml_form->submit($form, $form_state);
 
-  $ddi_metadata = sfudora_ajaxplorer_ingest_create_metadata($form, $form_state);
   $ddi_ds = $new_object->constructDatastream('DDI', 'M');
   $ddi_ds->label = 'DDI Record';
   $ddi_ds->mimeType = 'text/xml';
@@ -219,7 +217,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     else {
       $embargo_date = "indefinite";
     }
-    sfudora_ajaxplorer_ingest_set_embargo($new_object, $embargo_date);
+    sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
   }
 
   if (isset($form_state['values']['restrict_options']) &&
@@ -232,15 +230,6 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
 
   drupal_goto('islandora/object/islandora:root');
 
-}
-
-
-/**
- * Function to create ddi metadata from form.
- */
-function sfudora_ajaxplorer_ingest_create_metadata(&$form, &$form_state) {
-
-  return '';
 }
 
 /**
@@ -279,4 +268,33 @@ function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
     }
     $object->ingestDatastream($xacml_ds);
   }
+}
+
+/**
+ * Get the data from a file using a url.
+ * 
+ * @param AbstractObject|string $download_url
+ *   The url of the file to load.
+ * 
+ * @returns string $file_data
+ *   The file data as a string.
+ */
+function sfudora_ajaxplorer_get_file_data($download_url) {
+
+  // We want to pass the cookie information.
+  $temparray = array();
+  foreach ($_COOKIE as $key => $value) {
+    $temparray[] = $key . "=" . $value;
+  }
+  $temparray[] = 'path:/';
+  $cookies = implode('; ', $temparray);
+
+  $ch = curl_init($download_url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_COOKIE, $cookies);
+  // Store the response into the variable $file_data.
+  $file_data = curl_exec($ch);
+  curl_close($ch);
+
+  return $file_data;
 }
