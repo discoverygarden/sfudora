@@ -70,15 +70,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   $module_path = drupal_get_path('module', 'islandora_basic_image');
 
   $form_name = "Basic image MODS form";
-  $xml = file_get_contents("$module_path/xml/islandora_basic_image_form_mods.xml");
-
-  $form = xml_form_builder_get_form($form, $form_state, $form_name, $xml);
-
-  // Set a specific callback for the submit button.
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
-  );
+  $form = xml_form_builder_get_form($form, $form_state, $form_name);
 
   $form['restrict_options'] = array(
     '#type' => 'radios',
@@ -148,6 +140,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#type' => 'submit',
     '#value' => t('Ingest'),
   );
+
   return $form;
 }
 
@@ -184,9 +177,8 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: Do the XML form validation stuff to get the output XML.
   // TODO: Actually create objects... If we're a folder, download the ZIP,
   // iterate over all the contents, creating objects as necessary.
-
-  // We need to determine if single or folder ingest.
-  // We need to determine if object is generic based on file type.
+  // TODO: We need to determine if single or folder ingest.
+  // TODO: We need to determine if object is generic based on file type.
   module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'sfu:genericCModel';
   $parent_collection = 'islandora:root';
@@ -205,16 +197,18 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $obj_ds->setContentFromUrl($form_state['storage']['download_url']);
   $new_object->ingestDatastream($obj_ds);
 
-  // Create the MODS datastream.
+  // Create the DDI datastream.
+  $xml_form = new XMLForm($form_state);
+  $ddi_doc = $xml_form->submit($form, $form_state);
+
   $ddi_metadata = sfudora_ajaxplorer_ingest_create_metadata($form, $form_state);
   $ddi_ds = $new_object->constructDatastream('DDI', 'M');
   $ddi_ds->label = 'DDI Record';
   $ddi_ds->mimeType = 'text/xml';
-  $ddi_ds->setContentFromString($ddi_metadata);
+  $ddi_ds->setContentFromString($ddi_doc);
   $new_object->ingestDatastream($ddi_ds);
 
-  // add embargo to this object
-  // $objects = array("islandora:3");
+  // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
       $form_state['values']['restrict_options'] == 'embargo') {
     if (isset($form_state['values']['embargo_date']) &&
@@ -225,14 +219,14 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     else {
       $embargo_date = "indefinite";
     }
-    sfudora_ajaxplorer_ingest_set_embargo($objects, $embargo_date);
+    sfudora_ajaxplorer_ingest_set_embargo($new_object, $embargo_date);
   }
 
   if (isset($form_state['values']['restrict_options']) &&
       $form_state['values']['restrict_options'] == 'xacml') {
-    sfudora_ajaxplorer_ingest_set_xacml($objects, $form_state['values']['xacml']);
-  }  
-    
+    sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
+  }
+
   // Store the object.
   islandora_add_object($new_object);
 
