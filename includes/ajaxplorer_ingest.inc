@@ -127,11 +127,11 @@ function sfudora_ajaxplorer_add_file_object_relationship($download_url, $object)
   $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
   $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
   if (isset($parsed_url['query']['file'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['query']['file']);
+    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['query']['file'], TRUE);
   }
 
   if (isset($parsed_url['query']['repository'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository']);
+    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository'], TRUE);
   }
 }
 
