@@ -318,18 +318,41 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
 }
 
 /**
- * Get the object related to the ajaxplorer file.
+ * Set embargo of the object.
  * 
- * @param string $search_root
- *   The root object pid.
+ * @param AbstractObject|string $objects
+ *   The object or the pid of the object.
+ * @param string $end
+ *   The expire date (yyyy-mm-dd).
  */
-function sfudora_ajaxplorer_get_object($search_root) {
-  $query = drupal_get_query_parameters();
-  $repo = isset($query['repository']) ? $query['repository'] : FALSE;
-  $file = isset($query['file']) ? $query['file'] : FALSE;
-  $return_object = array();
-  sfudora_ajaxplorer_search_object($search_root, $return_object, $repo, $file);
-  print json_encode($return_object);
+function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
+  module_load_include('inc', 'islandora_scholar_embargo');
+  foreach ($objects as $object) {
+    islandora_scholar_embargo_set_embargo($object, NULL, $end);
+  }
+}
+
+/**
+ * Add the xacml to an object.
+ * 
+ * @param string|AbstractObject $objects
+ *   The object (or its pid) that the xacml should be added to
+ * @param string $xacml
+ *   The real path pf the xacml file.
+ */
+function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
+  foreach ($objects as $object) {
+    if (is_string($object)) {
+      $object = islandora_object_load($object);
+    }
+    $xacml_ds = $object->constructDatastream('POLICY', 'X');
+    $xacml_ds->setContentFromFile($xacml);
+    $xacml_ds->label = "XACML Policy Stream";
+    if ($object->getDatastream('POLICY')) {
+      $object->purgeDatastream('POLICY');
+    }
+    $object->ingestDatastream($xacml_ds);
+  }
 }
 
 /**
@@ -359,6 +382,68 @@ function sfudora_ajaxplorer_get_file_data($download_url) {
   curl_close($ch);
 
   return $file_data;
+}
+
+/**
+ * Parse the url and the query.
+ * 
+ * @param string $url
+ *   The url that should be parsed.
+ * 
+ * @return bool|array
+ *   Retrun the parsed url in an array or false.
+ */
+function sfudora_ajaxplorer_ingest_parse_url($url) {
+  $parsed_url = FALSE;
+  $parsed_url = parse_url($url);
+  $query = isset($parsed_url['query']) ? $parsed_url['query'] : '';
+  $query = explode('&', $query);
+  $query_array = array();
+  foreach ($query as $item) {
+    $temp = explode('=', $item);
+    $key = $temp[0];
+    $value = $temp[1];
+    $query_array[$key] = $value;
+  }
+  $parsed_url['query'] = $query_array;
+  return $parsed_url;
+}
+
+/**
+ * Add relationship between ajaxplorer file and islandora object.
+ * 
+ * @param string $download_url
+ *   The url in ajaxplorer.
+ * @param FedoraObject $object
+ *   The object that should add relationship
+ */
+function sfudora_ajaxplorer_add_file_object_relationship($download_url, $object) {
+  $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
+  $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
+  if (isset($parsed_url['query']['file'])) {
+    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['query']['file'], TRUE);
+  }
+
+  if (isset($parsed_url['query']['repository'])) {
+    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository'], TRUE);
+
+  }
+}
+
+
+/**
+ * Get the object related to the ajaxplorer file.
+ * 
+ * @param string $search_root
+ *   The root object pid.
+ */
+function sfudora_ajaxplorer_get_object($search_root) {
+  $query = drupal_get_query_parameters();
+  $repo = isset($query['repository']) ? $query['repository'] : FALSE;
+  $file = isset($query['file']) ? $query['file'] : FALSE;
+  $return_object = array();
+  sfudora_ajaxplorer_search_object($search_root, $return_object, $repo, $file);
+  print json_encode($return_object);
 }
 
 /**
