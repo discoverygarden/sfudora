@@ -67,7 +67,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   ));
 
   $form_state['storage']['download_url'] = $download_url;
-  $module_path = drupal_get_path('module', 'islandora_basic_image');
+  $form_state['storage']['ajaxplorer_params'] = $params;
 
   $form_name = "Basic image MODS form";
   $form = xml_form_builder_get_form($form, $form_state, $form_name);
@@ -181,19 +181,55 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $parent_collection = 'islandora:root';
 
   // Need to change this to be the metadata title.
-  $title = $form_state['values']['ddi']['titleInfo']['title'];
+  $title = $form_state['values']['titleInfo']['title'];
+  
+  //Create the new Fedora Object
   $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
 
-  $obj_label = 'Generic Record';
-  $obj_mimetype = 'image/jpeg';
-
   // Create the OBJ datastream.
-  $obj_ds = $new_object->constructDatastream('OBJ', 'M');
-  $obj_ds->label = $obj_label;
-  $obj_ds->mimeType = $obj_mimetype;
-  $obj_ds->setContentFromString(sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']));
-  $new_object->ingestDatastream($obj_ds);
+  sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object);
+  // Create the DDI datastream.
+  sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $new_object);
+  
+  // Add embargo to this object.
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'embargo') {
+    if (isset($form_state['values']['embargo_date']) &&
+        isset($form_state['values']['embargo_duration']) &&
+        $form_state['values']['embargo_duration'] == 'finite') {
+      $embargo_date = $form_state['values']['embargo_date'];
+    }
+    else {
+      $embargo_date = "indefinite";
+    }
+    sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
+  }
 
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'xacml') {
+    sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
+  }
+
+  // Store the Fedora Object.
+  islandora_add_object($new_object);
+
+  drupal_goto('islandora/object/islandora:root');
+
+}
+
+/**
+ * Creates a DDI Datastream.
+ * 
+ * @param array $form
+ *   The form.
+ * @param string $form_state
+ *   The form state.
+ * @param object $new_object
+ *   The new Object.
+ */
+function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $new_object) {
+
+  // Make copies of the form and form_state.
   $ddi_form = $form;
   $ddi_form_state = $form_state;
 
@@ -216,31 +252,29 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $ddi_ds->mimeType = 'text/xml';
   $ddi_ds->setContentFromString($ddi_doc->document->saveXML());
   $new_object->ingestDatastream($ddi_ds);
+}
 
-  // Add embargo to this object.
-  if (isset($form_state['values']['restrict_options']) &&
-      $form_state['values']['restrict_options'] == 'embargo') {
-    if (isset($form_state['values']['embargo_date']) &&
-        isset($form_state['values']['embargo_duration']) &&
-        $form_state['values']['embargo_duration'] == 'finite') {
-      $embargo_date = $form_state['values']['embargo_date'];
-    }
-    else {
-      $embargo_date = "indefinite";
-    }
-    sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
-  }
+/**
+ * Creates a OBJ Datastream.
+ * 
+ * @param array $form
+ *   The form.
+ * @param string $form_state
+ *   The form state.
+ * @param object $new_object
+ *   The new Object.
+ */
+function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object) {
 
-  if (isset($form_state['values']['restrict_options']) &&
-      $form_state['values']['restrict_options'] == 'xacml') {
-    sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
-  }
+  $obj_label = 'Generic Record';
+  $obj_mimetype = 'image/jpeg';
 
-  // Store the object.
-  islandora_add_object($new_object);
-
-  drupal_goto('islandora/object/islandora:root');
-
+  // Create the OBJ datastream.
+  $obj_ds = $new_object->constructDatastream('OBJ', 'M');
+  $obj_ds->label = $obj_label;
+  $obj_ds->mimeType = $obj_mimetype;
+  $obj_ds->setContentFromString(sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']));
+  $new_object->ingestDatastream($obj_ds);
 }
 
 /**
