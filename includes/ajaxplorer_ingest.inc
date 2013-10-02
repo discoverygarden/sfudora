@@ -112,6 +112,17 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#default_value' => FALSE,
   );
 
+  // Choose xacml.
+  $xacml_path = drupal_get_path('module', 'sfudora') . SFUDORA_XACML_FOLDER;
+  $xacmls = file_scan_directory($xacml_path, '/.*\.xml$/');
+
+  $options = array();
+  foreach ($xacmls as $xacml) {
+    $value = $xacml->name;
+    $key = drupal_realpath($xacml->uri);
+    $options[$key] = $value;
+  }
+
   $form['xacml'] = array(
     '#type' => 'select',
     '#title' => t('Select XACML file'),
@@ -179,7 +190,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
 
   // Create the OBJ datastream.
-  sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object);
+  $temp_obj_file_path = sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object);
   // Create the DDI datastream.
   sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
 
@@ -204,6 +215,9 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // Store the Fedora Object.
   islandora_add_object($new_object);
   sfudora_ajaxplorer_add_file_object_relationship($form_state['storage']['download_url'], $new_object);
+  
+  // Delete all Temp files
+  file_unmanaged_delete($temp_obj_file_path);
   drupal_goto('islandora/object/islandora:root');
 
 }
@@ -254,6 +268,9 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
  *   The form state.
  * @param object $new_object
  *   The new Object.
+ * 
+ * @return string
+ *   Returns the temporary file path of the downloaded file.
  */
 function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
@@ -267,8 +284,12 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
   $obj_ds->label = $obj_label;
   $obj_ds->mimeType = $obj_mimetype;
-  $obj_ds->setContentFromString(sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']));
+  $temp_file_path = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
+  $obj_ds->setContentFromFile($temp_file_path, FALSE);
   $new_object->ingestDatastream($obj_ds);
+
+  return $temp_file_path;
+
 }
 
 /**
@@ -315,8 +336,8 @@ function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
  * @param AbstractObject|string $download_url
  *   The url of the file to load.
  * 
- * @returns string $file_data
- *   The file data as a string.
+ * @returns string $temp_file_path
+ *   The path of the file in the tmp directory.
  */
 function sfudora_ajaxplorer_get_file_data($download_url) {
 
@@ -328,14 +349,22 @@ function sfudora_ajaxplorer_get_file_data($download_url) {
   $temparray[] = 'path:/';
   $cookies = implode('; ', $temparray);
 
-  $ch = curl_init($download_url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-  curl_setopt($ch, CURLOPT_COOKIE, $cookies);
-  // Store the response into the variable $file_data.
-  $file_data = curl_exec($ch);
-  curl_close($ch);
+  $temp_file_path = drupal_tempnam('temporary://', 'ajaxplorer_file');
+  $fp = fopen($temp_file_path, 'w+');
 
-  return $file_data;
+  $ch = curl_init($download_url);
+  curl_setopt($ch, CURLOPT_COOKIE, $cookies);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 50);
+  curl_setopt($ch, CURLOPT_FILE, $fp);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+
+  // Store the response into the variable $file_data.
+  curl_exec($ch);
+  curl_close($ch);
+  fclose($fp);
+
+  return $temp_file_path;
 }
 
 /**
