@@ -70,7 +70,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   $module_path = drupal_get_path('module', 'islandora_basic_image');
 
   $form_name = "Basic image MODS form";
-  $form['ddi'] = xml_form_builder_get_form($form, $form_state, $form_name);
+  $form = xml_form_builder_get_form($form, $form_state, $form_name);
 
   $form['restrict_options'] = array(
     '#type' => 'radios',
@@ -83,33 +83,30 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     ),
   );
 
-  $form['embargo'] = array(
-    '#type' => 'item',
-    '#states' => array(
-      'visible' => array(
-        ':input[name=restrict_options]' => array('value' => 'embargo'),
-      ),
-    ),
-  );
-
-  $form['embargo']['embargo_duration'] = array(
+  $form['embargo_duration'] = array(
     '#type' => 'radios',
+    '#tree' => TRUE,
     '#title' => t('Duration of Embargo'),
     '#default_value' => 'indefinite',
     '#options' => array(
       'indefinite' => t('Embargo indefinitely (must be lifted manually)'),
       'finite' => t('Embargo until date specified'),
     ),
+    '#states' => array(
+      'visible' => array(
+        ':input[name=restrict_options]' => array('value' => 'embargo'),
+      ),
+    ),
     '#default_value' => 'indefinite',
   );
-  $form['embargo']['embargo_date'] = array(
+  $form['embargo_date'] = array(
     '#type' => 'datepicker',
     '#title' => t('Embargo date'),
     '#description' => t('The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)'),
     '#states' => array(
       'visible' => array(
-        ':input[name=embargo_duration]' => array('value' => 'finite'),
         ':input[name=restrict_options]' => array('value' => 'embargo'),
+        ':input[name=embargo_duration]' => array('value' => 'finite'),
       ),
     ),
     '#default_value' => FALSE,
@@ -179,6 +176,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // iterate over all the contents, creating objects as necessary.
   // TODO: We need to determine if single or folder ingest.
   // TODO: We need to determine if object is generic based on file type.
+  module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'sfu:genericCModel';
   $parent_collection = 'islandora:root';
 
@@ -196,14 +194,27 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $obj_ds->setContentFromString(sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']));
   $new_object->ingestDatastream($obj_ds);
 
-  // Create the DDI datastream.
-  $xml_form = new XMLForm($form_state);
-  $ddi_doc = $xml_form->submit($form, $form_state);
+  $ddi_form = $form;
+  $ddi_form_state = $form_state;
 
+  // All of the form values that are not part of the form builder form will be
+  // removed for processing.
+  unset($ddi_form['restrict_options']);
+  unset($ddi_form['embargo_duration']);
+  unset($ddi_form['embargo_date']);
+  unset($ddi_form['xacml']);
+  unset($ddi_form_state['values']['restrict_options']);
+  unset($ddi_form_state['values']['embargo_duration']);
+  unset($ddi_form_state['values']['embargo_date']);
+  unset($ddi_form_state['values']['xacml']);
+
+  // Create the DDI datastream.
+  $xml_form = new XMLForm($ddi_form_state);
+  $ddi_doc = $xml_form->submit($ddi_form, $ddi_form_state);
   $ddi_ds = $new_object->constructDatastream('DDI', 'M');
   $ddi_ds->label = 'DDI Record';
   $ddi_ds->mimeType = 'text/xml';
-  $ddi_ds->setContentFromString($ddi_doc);
+  $ddi_ds->setContentFromString($ddi_doc->document->saveXML());
   $new_object->ingestDatastream($ddi_ds);
 
   // Add embargo to this object.
