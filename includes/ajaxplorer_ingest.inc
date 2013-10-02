@@ -61,79 +61,25 @@ EOCSS;
 function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   form_load_include($form_state, 'inc', 'sfudora', 'includes/ajaxplorer_ingest');
 
-  // TODO: Get our DDI XML form, dump it into $form.
-  $form['dummy'] = array(
-    '#type' => 'item',
-    '#title' => t('Dummy "field"'),
-    '#markup' => t('Blahblahblah'),
-  );
+  $download_url = url($params['download_base_url'], array(
+    'query' => $params['download_query_params'],
+    'absolute' => TRUE,
+  ));
 
-  $form['restrict_options'] = array(
-    '#type' => 'radios',
-    '#title' => t("Is this publication restricted?"),
-    '#options' => array(
-      'not_restricted' => t("no restriction"),
-      'embargo' => t('use embargo'),
-      'xacml' => t('use xacml'),
-    ),
-  );
+  $form_state['storage']['download_url'] = $download_url;
+  $module_path = drupal_get_path('module', 'islandora_basic_image');
 
-  $form['embargo'] = array(
-    '#type' => 'item',
-    '#states' => array(
-      'visible' => array(
-        ':input[name=restrict_options]' => array('value' => 'embargo'),
-      ),
-    ),
-  );
+  $form_name = "Basic image MODS form";
+  $xml = file_get_contents("$module_path/xml/islandora_basic_image_form_mods.xml");
 
-  $form['embargo']['embargo_duration'] = array(
-    '#type' => 'radios',
-    '#title' => t('Duration of Embargo'),
-    '#options' => array(
-      'indefinite' => t('Embargo indefinitely (must be lifted manually)'),
-      'finite' => t('Embargo until date specified'),
-    ),
-    '#default_value' => 'indefinite',
-  );
-  $form['embargo']['embargo_date'] = array(
-    '#type' => 'datepicker',
-    '#title' => 'Embargo date',
-    '#description' => 'The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)',
-    '#states' => array(
-      'visible' => array(
-        ':input[name=embargo_duration]' => array('value' => 'finite'),
-        ':input[name=restrict_options]' => array('value' => 'embargo'),
-      ),
-    ),
-    '#default_value' => FALSE,
-  );
+  $form = xml_form_builder_get_form($form, $form_state, $form_name, $xml);
 
-  // Choose xacml.
-  $xacml_path = drupal_get_path('module', 'sfudora') . SFUDORA_XACML_FOLDER;
-  $xacmls = file_scan_directory($xacml_path, '/.*\.xml$/');
-
-  $options = array();
-  foreach ($xacmls as $xacml) {
-    $value = $xacml->name;
-    $key = drupal_realpath($xacml->uri);
-    $options[$key] = $value;
-  }
-
-  $form['xacml'] = array(
-    '#type' => 'select',
-    '#title' => 'select xacml file',
-    '#options' => $options,
-    '#states' => array(
-      'visible' => array(
-        ':input[name=restrict_options]' => array('value' => 'xacml'),
-      ),
-    ),
-  );
+  // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Ingest'),
+    '#value' => t('Submit'),
   );
+
   return $form;
 }
 
@@ -142,12 +88,130 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
  */
 function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
   // TODO: Do the XML Form validation stuffs...
-  $date = $form_state['values']['embargo_date'];
-  $time_now = time();
-  $parsed = strtotime($date);
-  if ($form_state['values']['restrict_options'] == 'embargo' && $form_state['values']['embargo_duration'] == 'finite') {
-    if ($parsed <= $time_now) {
-      form_set_error('embargo_date', t('You cannot specify a date in the past!'));
+}
+
+/**
+ * Parse the url and teh query.
+ * 
+ * @param string $url
+ *   The url that should be parsed.
+ * 
+ * @return bool|array
+ *   Retrun the parsed url in an array or false.
+ */
+function sfudora_ajaxplorer_ingest_parse_url($url) {
+  $parsed_url = FALSE;
+  $parsed_url = parse_url($url);
+  $query = isset($parsed_url['query']) ? $parsed_url['query'] : '';
+  $query = explode('&', $query);
+  $query_array = array();
+  foreach ($query as $item) {
+    $temp = explode('=', $item);
+    $key = $temp[0];
+    $value = $temp[1];
+    $query_array[$key] = $value;
+  }
+  $parsed_url['query'] = $query_array;
+  return $parsed_url;
+}
+
+/**
+ * Add relationship between ajaxplorer file and islandora object.
+ * 
+ * @param string $download_url
+ *   The url in ajaxplorer.
+ * @param FedoraObject $object
+ *   The object that should add relationship
+ */
+function sfudora_ajaxplorer_add_file_object_relationship($download_url, $object) {
+  $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
+  $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
+  if (isset($parsed_url['query']['file'])) {
+    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['query']['file']);
+  }
+
+  if (isset($parsed_url['query']['repository'])) {
+    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository']);
+  }
+}
+
+/**
+ * Get the object related to the ajaxplorer file.
+ * 
+ * @param string $search_root
+ *   The root object pid.
+ */
+function sfudora_ajaxplorer_get_object($search_root) {
+  $query = drupal_get_query_parameters();
+  $repo = isset($query['repository']) ? $query['repository'] : FALSE;
+  $file = isset($query['file']) ? $query['file'] : FALSE;
+  $return_object = array();
+  sfudora_ajaxplorer_search_object($search_root, $return_object, $repo, $file);
+  print json_encode($return_object);
+}
+
+/**
+ * Recuresively search object that related to the ajaxplorer file.
+ * 
+ * @param string $search_root
+ *   The root object pid.
+ * @param array $return_array
+ *   The array which contains resualt object.
+ * @param string $repo
+ *   The repository id in ajaxplorer which passed in http query.
+ * @param string $file
+ *   The file path in ajaxplorer which passed in http query.
+ */
+function sfudora_ajaxplorer_search_object($search_root, &$return_array, $repo = FALSE, $file = FALSE) {
+  $object = islandora_object_load($search_root);
+  $relationship_file = $object->relationships->get(SFUDORA_AJXP_URI, 'file');
+  $relationship_repo = $object->relationships->get(SFUDORA_AJXP_URI, 'repository');
+  $rfile = FALSE;
+  $rrepo = FALSE;
+  if (!empty($relationship_file)) {
+    $rfile = urldecode($relationship_file[0]['object']['value']);
+  }
+
+  if (!empty($relationship_repo)) {
+    $rrepo = $relationship_repo[0]['object']['value'];
+  }
+  $equal = TRUE;
+  if ($rrepo && $rrepo !== $repo) {
+    $equal = FALSE;
+  }
+  if (!$file || $rfile !== $file) {
+    $equal = FALSE;
+  }
+  if ($equal) {
+    $return_array[] = array(
+      'id' => $object->id,
+      'label' => $object->label,
+      'createdDate' => $object->createdDate,
+      'state' => $object->state,
+      'lastModifiedDate' => $object->lastModifiedDate,
+      'owner' => $object->owner,
+    );
+  }
+  $is_collection = FALSE;
+  foreach ($object->models as $model) {
+    if ($model == "islandora:collectionCModel") {
+      $is_collection = TRUE;
+    }
+  }
+
+  if ($is_collection) {
+    $query = "SELECT DISTINCT ?object ?title
+     FROM <#ri>
+     WHERE {
+    ?object ?collection_predicate <info:fedora/$search_root> ;
+          <fedora-model:label> ?title ;
+          <fedora-model:state> <fedora-model:Active> .
+     FILTER(sameTerm(?collection_predicate, <fedora-rels-ext:isMemberOfCollection>))
+  }ORDER BY ?title";
+    $result = $object->repository->ri->query($query, 'sparql');
+    foreach ($result as $obj) {
+      $pid = $obj['object']['value'];
+      sfudora_ajaxplorer_search_object($pid, $return_array, $repo, $file);
     }
   }
 }
@@ -159,62 +223,44 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: Do the XML form validation stuff to get the output XML.
   // TODO: Actually create objects... If we're a folder, download the ZIP,
   // iterate over all the contents, creating objects as necessary.
-  // add embargo to this object
-  // $objects = array("islandora:3");
-  if (isset($form_state['values']['restrict_options']) &&
-      $form_state['values']['restrict_options'] == 'embargo') {
-    if (isset($form_state['values']['embargo_date']) &&
-        isset($form_state['values']['embargo_duration']) &&
-        $form_state['values']['embargo_duration'] == 'finite') {
-      $embargo_date = $form_state['values']['embargo_date'];
-    }
-    else {
-      $embargo_date = "indefinite";
-    }
-    sfudora_ajaxplorer_ingest_set_embargo($objects, $embargo_date);
-  }
+  // We need to determine if single or folder ingest.
+  // We need to determine if object is generic based on file type.
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $content_model = 'sfu:genericCModel';
+  $parent_collection = 'islandora:root';
 
-  if (isset($form_state['values']['restrict_options']) &&
-      $form_state['values']['restrict_options'] == 'xacml') {
-    sfudora_ajaxplorer_ingest_set_xacml($objects, $form_state['values']['xacml']);
-  }
+  // Need to change this to be the metadata title.
+  $title = 'test';
+  $new_object = islandora_prepare_new_object("test", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+
+  $obj_label = 'Generic Record';
+  $obj_mimetype = 'image/jpeg';
+
+  // Create the MODS datastream.
+  $obj_ds = $new_object->constructDatastream('OBJ', 'M');
+  $obj_ds->label = $obj_label;
+  $obj_ds->mimeType = $obj_mimetype;
+  $obj_ds->setContentFromUrl($form_state['storage']['download_url']);
+  $new_object->ingestDatastream($obj_ds);
+
+  // Create the MODS datastream.
+  $ddi_metadata = sfudora_ajaxplorer_ingest_create_metadata($form, $form_state);
+  $ddi_ds = $new_object->constructDatastream('DDI', 'M');
+  $ddi_ds->label = 'DDI Record';
+  $ddi_ds->mimeType = 'text/xml';
+  $ddi_ds->setContentFromString($ddi_metadata);
+  $new_object->ingestDatastream($ddi_ds);
+
+  // Store the object.
+  islandora_add_object($new_object);
+  sfudora_ajaxplorer_add_file_object_relationship($form_state['storage']['download_url'], $new_object);
+  drupal_goto('islandora/object/islandora:root');
 }
 
 /**
- * Set embargo of the object.
- * 
- * @param AbstractObject|string $objects
- *   The object or the pid of the object.
- * @param string $end
- *   The expire date (yyyy-mm-dd).
+ * Function to create ddi metadata from form.
  */
-function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
-  module_load_include('inc', 'islandora_scholar_embargo');
-  foreach ($objects as $object) {
-    islandora_scholar_embargo_set_embargo($object, NULL, $end);
-  }
-}
+function sfudora_ajaxplorer_ingest_create_metadata(&$form, &$form_state) {
 
-/**
- * Add the xacml to an object.
- * 
- * @param string|AbstractObject $objects
- *   The object (or its pid) that the xacml should be added to
- * @param string $xacml
- *   The real path pf the xacml file.
- */
-function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
-  module_load_include('module', 'islandora');
-  foreach ($objects as $object) {
-    if (is_string($object)) {
-      $object = islandora_object_load($object);
-    }
-    $xacml_ds = new IslandoraNewFedoraDatastream('POLICY', 'X', $object, $object->repository);
-    $xacml_ds->setContentFromFile($xacml);
-    $xacml_ds->label = "XACML Policy Stream";
-    if ($object->getDatastream('POLICY')) {
-      $object->purgeDatastream('POLICY');
-    }
-    $object->ingestDatastream($xacml_ds);
-  }
+  return '';
 }
