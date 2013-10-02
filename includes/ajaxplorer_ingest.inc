@@ -137,23 +137,22 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#type' => 'submit',
     '#value' => t('Ingest'),
   );
-  
-  if($params['is_dir']=='true')
-  {
-    sfudora_foulder_ingest_form($form, $form_state,$params);
+
+  if ($params['is_dir'] == 'true') {
+    sfudora_foulder_ingest_form($form, $form_state, $params);
   }
   return $form;
 }
 
-function sfudora_foulder_ingest_form(&$form, &$form_state,$params) {
+function sfudora_foulder_ingest_form(&$form, &$form_state, $params) {
   $file = $params['download_query_params']['file'];
   $path = explode('/', $file);
   $name = end($path);
-  $form['titleInfo']['title']['#type']='hidden';
-  $form['titleInfo']['title']['#value']= $name;
+  $form['titleInfo']['title']['#type'] = 'hidden';
+  $form['titleInfo']['title']['#value'] = $name;
 }
 
-function sfudora_ingest_single_object(&$form, &$form_state,$parent_collection = 'islandora:root') {
+function sfudora_ingest_single_object(&$form, &$form_state, $parent_collection = 'islandora:root') {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'sfu:genericCModel';
 
@@ -190,6 +189,7 @@ function sfudora_ingest_single_object(&$form, &$form_state,$parent_collection = 
   // Store the Fedora Object.
   islandora_add_object($new_object);
 }
+
 /**
  * Form validation function.
  */
@@ -234,19 +234,17 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   drupal_goto('islandora/object/islandora:root');
 }
 
-function sfudora_ingest_folder(&$form, &$form_state)
-{
+function sfudora_ingest_folder(&$form, &$form_state) {
   $folder = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
   $tmp_path = file_directory_temp();
-  $filename = $tmp_path.'/'.$form_state['values']['titleInfo']['title'].'.zip';
+  $filename = $tmp_path . '/' . $form_state['values']['titleInfo']['title'] . '.zip';
   file_put_contents($filename, $folder);
   $output = shell_exec("unzip $filename -d $tmp_path");
-  $tmp_folder =  $tmp_path.'/'.$form_state['values']['titleInfo']['title'];
-  sfudora_ingest_collection(&$form, &$form_state, $tmp_folder,"islandora:root");
+  $tmp_folder = $tmp_path . '/' . $form_state['values']['titleInfo']['title'];
+  sfudora_ingest_collection(&$form, &$form_state, $tmp_folder, "islandora:root");
 }
 
-function sfudora_ingest_collection(&$form, &$form_state, $filedir,$parent)
-{
+function sfudora_ingest_collection(&$form, &$form_state, $filedir, $parent) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'islandora:collectionCModel';
   $parent_collection = $parent;
@@ -264,7 +262,7 @@ function sfudora_ingest_collection(&$form, &$form_state, $filedir,$parent)
         $name = $name . $name_array[$i];
       }
       $form['titleInfo']['title']['#value'] = $name;
-      $form_state['values']['titleInfo']['title'] =$name;
+      $form_state['values']['titleInfo']['title'] = $name;
       $is_dir = is_dir($filedir . '/' . $file);
       if ($is_dir) {
         sfudora_ingest_collection(&$form, &$form_state, $filedir . '/' . $file, $new_object->id);
@@ -272,7 +270,7 @@ function sfudora_ingest_collection(&$form, &$form_state, $filedir,$parent)
       else {
         $form_state['storage']['url'] = $filedir . '/' . $file;
         unset($form_state['storage']['download_url']);
-        sfudora_ingest_single_object(&$form, &$form_state,$new_object->id);
+        sfudora_ingest_single_object(&$form, &$form_state, $new_object->id);
       }
     }
   }
@@ -338,12 +336,10 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
   $obj_ds->label = $obj_label;
   $obj_ds->mimeType = $obj_mimetype;
   $file_content = "";
-  if(isset($form_state['storage']['download_url']))
-  {
+  if (isset($form_state['storage']['download_url'])) {
     $file_content = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
   }
-  else if(isset($form_state['storage']['url']))
-  {
+  else if (isset($form_state['storage']['url'])) {
     $file_content = file_get_contents($form_state['storage']['url']);
   }
   $obj_ds->setContentFromString($file_content);
