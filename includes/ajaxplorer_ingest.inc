@@ -182,15 +182,15 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
 
   // Need to change this to be the metadata title.
   $title = $form_state['values']['titleInfo']['title'];
-  
-  //Create the new Fedora Object
+
+  // Create the new Fedora Object.
   $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
 
   // Create the OBJ datastream.
   sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object);
   // Create the DDI datastream.
   sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
-  
+
   // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
       $form_state['values']['restrict_options'] == 'embargo') {
@@ -265,9 +265,12 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
  *   The new Object.
  */
 function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object) {
+  module_load_include('inc', 'islandora', 'includes/mime_detect');
 
   $obj_label = 'Generic Record';
-  $obj_mimetype = 'image/jpeg';
+
+  $mime_detect = new MimeDetect();
+  $obj_mimetype = $mime_detect->getMimetype($form_state['storage']['ajaxplorer_params']['download_query_params']['file']);
 
   // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
