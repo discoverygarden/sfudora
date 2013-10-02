@@ -160,52 +160,6 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
 }
 
 /**
- * Parse the url and the query.
- * 
- * @param string $url
- *   The url that should be parsed.
- * 
- * @return bool|array
- *   Retrun the parsed url in an array or false.
- */
-function sfudora_ajaxplorer_ingest_parse_url($url) {
-  $parsed_url = FALSE;
-  $parsed_url = parse_url($url);
-  $query = isset($parsed_url['query']) ? $parsed_url['query'] : '';
-  $query = explode('&', $query);
-  $query_array = array();
-  foreach ($query as $item) {
-    $temp = explode('=', $item);
-    $key = $temp[0];
-    $value = $temp[1];
-    $query_array[$key] = $value;
-  }
-  $parsed_url['query'] = $query_array;
-  return $parsed_url;
-}
-
-/**
- * Add relationship between ajaxplorer file and islandora object.
- * 
- * @param string $download_url
- *   The url in ajaxplorer.
- * @param FedoraObject $object
- *   The object that should add relationship
- */
-function sfudora_ajaxplorer_add_file_object_relationship($download_url, $object) {
-  $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
-  $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
-  if (isset($parsed_url['query']['file'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['query']['file'], TRUE);
-  }
-
-  if (isset($parsed_url['query']['repository'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository'], TRUE);
-
-  }
-}
-
-/**
  * Form submission function.
  */
 function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
