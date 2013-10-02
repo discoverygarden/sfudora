@@ -187,9 +187,9 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
 
   // Create the OBJ datastream.
-  sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object);
+  sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object);
   // Create the DDI datastream.
-  sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $new_object);
+  sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
   
   // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
