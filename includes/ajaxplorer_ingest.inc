@@ -17,7 +17,7 @@
  * associative array so they're easier to use later.
  *
  * @return array
- * A form, 'cause forms are awesome.
+ *   A form, 'cause forms are awesome.
  */
 function sfudora_ajaxplorer_ingest() {
   $params = drupal_get_query_parameters();
@@ -144,6 +144,12 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   return $form;
 }
 
+/**
+ * Hide the title of object ingest form.
+ * 
+ * @param array $params
+ *   The parameters that ajaxplorer passed.
+ */
 function sfudora_foulder_ingest_form(&$form, &$form_state, $params) {
   $file = $params['download_query_params']['file'];
   $path = explode('/', $file);
@@ -152,6 +158,12 @@ function sfudora_foulder_ingest_form(&$form, &$form_state, $params) {
   $form['titleInfo']['title']['#value'] = $name;
 }
 
+/**
+ * Ingest a single object to a collection.
+ * 
+ * @param string $parent_collection
+ *   The collection that the object should be ingested into
+ */
 function sfudora_ingest_single_object(&$form, &$form_state, $parent_collection = 'islandora:root') {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'sfu:genericCModel';
@@ -178,7 +190,6 @@ function sfudora_ingest_single_object(&$form, &$form_state, $parent_collection =
     else {
       $embargo_date = "indefinite";
     }
-    dd($title, "ingesting");
     sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
   }
 
@@ -235,6 +246,9 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   drupal_goto('islandora/object/islandora:root');
 }
 
+/**
+ * Ingest a ajaxplorer folder as a collection in islandora.
+ */
 function sfudora_ingest_folder(&$form, &$form_state) {
   $folder = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
   $tmp_path = file_directory_temp();
@@ -243,8 +257,18 @@ function sfudora_ingest_folder(&$form, &$form_state) {
   $output = shell_exec("unzip $filename -d $tmp_path");
   $tmp_folder = $tmp_path . '/' . $form_state['values']['titleInfo']['title'];
   sfudora_ingest_collection($form, $form_state, $tmp_folder, "islandora:root");
+  file_unmanaged_delete($filename);
+  file_unmanaged_delete_recursive($tmp_folder);
 }
 
+/**
+ * Recursively ingest the collection.
+ * 
+ * @param string $filedir
+ *   The directory of the folder.
+ * @param string $parent
+ *   The parent folder of the current folder.
+ */
 function sfudora_ingest_collection(&$form, &$form_state, $filedir, $parent) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $content_model = 'islandora:collectionCModel';
@@ -260,7 +284,7 @@ function sfudora_ingest_collection(&$form, &$form_state, $filedir, $parent) {
       $name_array = explode('.', $file);
       $name = "";
       $is_dir = is_dir($filedir . '/' . $file);
-      for ($i = 0; $i < sizeof($name_array) - 1; $i++) {
+      for ($i = 0; $i < count($name_array) - 1; $i++) {
         $name = $name . $name_array[$i];
       }
       if ($is_dir) {
@@ -284,11 +308,11 @@ function sfudora_ingest_collection(&$form, &$form_state, $filedir, $parent) {
  * Creates a DDI Datastream.
  *
  * @param array $form
- * The form.
+ *   The form.
  * @param string $form_state
- * The form state.
+ *   The form state.
  * @param object $new_object
- * The new Object.
+ *   The new Object.
  */
 function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $new_object) {
 
@@ -321,11 +345,11 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
  * Creates a OBJ Datastream.
  *
  * @param array $form
- * The form.
+ *   The form.
  * @param string $form_state
- * The form state.
+ *   The form state.
  * @param object $new_object
- * The new Object.
+ *   The new Object.
  */
 function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
@@ -343,7 +367,7 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
   if (isset($form_state['storage']['download_url'])) {
     $file_content = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
   }
-  else if (isset($form_state['storage']['url'])) {
+  elseif (isset($form_state['storage']['url'])) {
     $file_content = file_get_contents($form_state['storage']['url']);
   }
   $obj_ds->setContentFromString($file_content);
@@ -354,9 +378,9 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
  * Set embargo of the object.
  *
  * @param AbstractObject|string $objects
- * The object or the pid of the object.
+ *   The object or the pid of the object.
  * @param string $end
- * The expire date (yyyy-mm-dd).
+ *   The expire date (yyyy-mm-dd).
  */
 function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
   module_load_include('inc', 'islandora_scholar_embargo');
@@ -369,9 +393,9 @@ function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
  * Add the xacml to an object.
  *
  * @param string|AbstractObject $objects
- * The object (or its pid) that the xacml should be added to
+ *   The object (or its pid) that the xacml should be added to
  * @param string $xacml
- * The real path pf the xacml file.
+ *   The real path pf the xacml file.
  */
 function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
   foreach ($objects as $object) {
@@ -392,10 +416,10 @@ function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
  * Get the data from a file using a url.
  *
  * @param AbstractObject|string $download_url
- * The url of the file to load.
+ *   The url of the file to load.
  *
  * @returns string $file_data
- * The file data as a string.
+ *   The file data as a string.
  */
 function sfudora_ajaxplorer_get_file_data($download_url) {
 
