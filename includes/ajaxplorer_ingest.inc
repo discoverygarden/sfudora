@@ -32,7 +32,7 @@ function sfudora_ajaxplorer_ingest() {
   // the site.
   $js = <<<EOJS
   jQuery(document).ready(function() {
-    to_show = jQuery('#block-system-main, #block-system-main *').parentsUntil('body').andSelf();
+    to_show = jQuery('#block-system-main *, #messages *').parentsUntil('body').andSelf();
     jQuery('body *').not(to_show).hide();
     jQuery('body').removeClass('admin-menu');
   });
