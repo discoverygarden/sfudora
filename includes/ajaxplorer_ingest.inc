@@ -178,6 +178,7 @@ function sfudora_ingest_single_object(&$form, &$form_state, $parent_collection =
     else {
       $embargo_date = "indefinite";
     }
+    dd($title, "ingesting");
     sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
   }
 
@@ -226,10 +227,10 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: We need to determine if object is generic based on file type.
   $params = $form_state['storage']['ajaxplorer_params'];
   if ($params['is_dir'] == "true") {
-    sfudora_ingest_folder(&$form, &$form_state);
+    sfudora_ingest_folder($form, $form_state);
   }
   else {
-    sfudora_ingest_single_object(&$form, &$form_state);
+    sfudora_ingest_single_object($form, $form_state);
   }
   drupal_goto('islandora/object/islandora:root');
 }
@@ -241,7 +242,7 @@ function sfudora_ingest_folder(&$form, &$form_state) {
   file_put_contents($filename, $folder);
   $output = shell_exec("unzip $filename -d $tmp_path");
   $tmp_folder = $tmp_path . '/' . $form_state['values']['titleInfo']['title'];
-  sfudora_ingest_collection(&$form, &$form_state, $tmp_folder, "islandora:root");
+  sfudora_ingest_collection($form, $form_state, $tmp_folder, "islandora:root");
 }
 
 function sfudora_ingest_collection(&$form, &$form_state, $filedir, $parent) {
@@ -258,19 +259,22 @@ function sfudora_ingest_collection(&$form, &$form_state, $filedir, $parent) {
     if (($file !== '.') && ($file !== '..')) {
       $name_array = explode('.', $file);
       $name = "";
-      for ($i = 0; $i < sizeof($name_array); $i++) {
+      $is_dir = is_dir($filedir . '/' . $file);
+      for ($i = 0; $i < sizeof($name_array) - 1; $i++) {
         $name = $name . $name_array[$i];
+      }
+      if ($is_dir) {
+        $name = $name . end($name_array);
       }
       $form['titleInfo']['title']['#value'] = $name;
       $form_state['values']['titleInfo']['title'] = $name;
-      $is_dir = is_dir($filedir . '/' . $file);
       if ($is_dir) {
-        sfudora_ingest_collection(&$form, &$form_state, $filedir . '/' . $file, $new_object->id);
+        sfudora_ingest_collection($form, $form_state, $filedir . '/' . $file, $new_object->id);
       }
       else {
         $form_state['storage']['url'] = $filedir . '/' . $file;
         unset($form_state['storage']['download_url']);
-        sfudora_ingest_single_object(&$form, &$form_state, $new_object->id);
+        sfudora_ingest_single_object($form, $form_state, $new_object->id);
       }
     }
   }
