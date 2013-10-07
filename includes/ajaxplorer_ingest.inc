@@ -215,8 +215,8 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // Store the Fedora Object.
   islandora_add_object($new_object);
   sfudora_ajaxplorer_add_file_object_relationship($form_state['storage']['download_url'], $new_object);
-  
-  // Delete all Temp files
+
+  // Delete all Temp files.
   file_unmanaged_delete($temp_obj_file_path);
   drupal_goto('islandora/object/islandora:root');
 
@@ -410,87 +410,5 @@ function sfudora_ajaxplorer_add_file_object_relationship($download_url, $object)
   if (isset($parsed_url['query']['repository'])) {
     $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository'], TRUE);
 
-  }
-}
-
-
-/**
- * Get the object related to the ajaxplorer file.
- * 
- * @param string $search_root
- *   The root object pid.
- */
-function sfudora_ajaxplorer_get_object($search_root) {
-  $query = drupal_get_query_parameters();
-  $repo = isset($query['repository']) ? $query['repository'] : FALSE;
-  $file = isset($query['file']) ? $query['file'] : FALSE;
-  $return_object = array();
-  sfudora_ajaxplorer_search_object($search_root, $return_object, $repo, $file);
-  print json_encode($return_object);
-}
-
-/**
- * Recuresively search object that related to the ajaxplorer file.
- * 
- * @param string $search_root
- *   The root object pid.
- * @param array $return_array
- *   The array which contains resualt object.
- * @param string $repo
- *   The repository id in ajaxplorer which passed in http query.
- * @param string $file
- *   The file path in ajaxplorer which passed in http query.
- */
-function sfudora_ajaxplorer_search_object($search_root, &$return_array, $repo = FALSE, $file = FALSE) {
-  $object = islandora_object_load($search_root);
-  $relationship_file = $object->relationships->get(SFUDORA_AJXP_URI, 'file');
-  $relationship_repo = $object->relationships->get(SFUDORA_AJXP_URI, 'repository');
-  $rfile = FALSE;
-  $rrepo = FALSE;
-  if (!empty($relationship_file)) {
-    $rfile = urldecode($relationship_file[0]['object']['value']);
-  }
-
-  if (!empty($relationship_repo)) {
-    $rrepo = $relationship_repo[0]['object']['value'];
-  }
-  $equal = TRUE;
-  if ($rrepo && $rrepo !== $repo) {
-    $equal = FALSE;
-  }
-  if (!$file || $rfile !== $file) {
-    $equal = FALSE;
-  }
-  if ($equal) {
-    $return_array[] = array(
-      'id' => $object->id,
-      'label' => $object->label,
-      'createdDate' => $object->createdDate,
-      'state' => $object->state,
-      'lastModifiedDate' => $object->lastModifiedDate,
-      'owner' => $object->owner,
-    );
-  }
-  $is_collection = FALSE;
-  foreach ($object->models as $model) {
-    if ($model == "islandora:collectionCModel") {
-      $is_collection = TRUE;
-    }
-  }
-
-  if ($is_collection) {
-    $query = "SELECT DISTINCT ?object ?title
-     FROM <#ri>
-     WHERE {
-    ?object ?collection_predicate <info:fedora/$search_root> ;
-          <fedora-model:label> ?title ;
-          <fedora-model:state> <fedora-model:Active> .
-     FILTER(sameTerm(?collection_predicate, <fedora-rels-ext:isMemberOfCollection>))
-  }ORDER BY ?title";
-    $result = $object->repository->ri->query($query, 'sparql');
-    foreach ($result as $obj) {
-      $pid = $obj['object']['value'];
-      sfudora_ajaxplorer_search_object($pid, $return_array, $repo, $file);
-    }
   }
 }

@@ -7,7 +7,6 @@
 
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
 define('SFUDORA_XACML_FOLDER', '/xacml');
-define('SFUDORA_AJXP_GET_OBJECT_PATH', 'sfudora/rest/getobject');
 define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
 
 /**
@@ -24,13 +23,6 @@ function sfudora_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items[SFUDORA_AJXP_GET_OBJECT_PATH] = array(
-    'access callback' => TRUE,
-    'page callback' => 'sfudora_ajaxplorer_get_object',
-    'page arguments' => array("islandora:root"),
-    'file' => 'includes/ajaxplorer_ingest.inc',
-    'type' => MENU_CALLBACK,
-  );
   return $items;
 }
 
