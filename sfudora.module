@@ -6,6 +6,8 @@
  */
 
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
+define('SFUDORA_XACML_FOLDER', '/xacml');
+define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
 
 /**
  * Implements hook_menu().
@@ -29,7 +31,6 @@ function sfudora_menu() {
  */
 function sfudora_islandora_required_objects(IslandoraTuque $connection) {
   $module_path = drupal_get_path('module', 'sfudora');
-
   // SFU Generic Content Model.
   $generic_cmodel = $connection->repository->constructObject('sfu:genericCModel');
   $generic_cmodel->owner = 'fedoraAdmin';
