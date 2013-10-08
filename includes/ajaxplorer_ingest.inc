@@ -211,6 +211,22 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $parent_c
       $form_state['values']['restrict_options'] == 'xacml') {
     sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
   }
+
+  $param = $form_state['storage']['ajaxplorer_params'];
+  $ajax_url = "";
+  if (isset($form_state['storage']['download_url'])) {
+    $ajax_url = $param['download_query_params'];
+  }
+  else {
+    $file_path = explode('/', $param['download_query_params']['file']);
+    $root_path = "";
+    for ($i = 0; $i < count($file_path) - 1; $i++) {
+      $root_path .= $file_path[$i] . '/';
+    }
+    $param['download_query_params']['file'] = str_replace(file_directory_temp() . "/", $root_path, $form_state['storage']['url']);
+    $ajax_url = $param['download_query_params'];
+  }
+  sfudora_ajaxplorer_add_file_object_relationship($ajax_url, $new_object);
   islandora_add_object($new_object);
   return $new_object->id;
 }
@@ -275,7 +291,6 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     batch_process("/islandora/object/islandora:root");
   }
   else {
-    dd("enter this");
     sfudora_ajaxplorer_ingest_single_object($form, $form_state);
   }
 }
@@ -524,4 +539,62 @@ function sfudora_ajaxplorer_get_file_data($download_url) {
   fclose($fp);
 
   return array("path" => $temp_file_path, "info" => $info);
+}
+
+/**
+ * Get an array of object which is related to the ajaxplorer file.
+ * 
+ * @param string $repo
+ *   The ajaxplorer id to search.
+ * @param string $file
+ *   The ajaxplorer file path to search.
+ * @param string $search_root
+ *   The root file of the repository.
+ * 
+ * @return array
+ *   An array of result pid.
+ */
+function sfudora_ajaxplorer_get_object($repo = FALSE, $file = FALSE, $search_root = 'islandora:root') {
+  $object = islandora_object_load($search_root);
+  if (!($repo === FALSE) && $file) {
+    $query = "SELECT ?object from <#ri>
+      WHERE {?object <http://ajaxplorer.info#file> \"" . $file . "\".
+       ?object <http://ajaxplorer.info#repository> \"" . $repo . "\".
+  }";
+  }
+  elseif ($file) {
+    $query = "SELECT ?object from <#ri>
+      WHERE {?object <http://ajaxplorer.info#file> \"" . $file . "\".
+  }";
+  }
+  $result = $object->repository->ri->query($query, 'sparql');
+  $pids = array();
+  foreach ($result as $array) {
+    if (isset($array['object'])) {
+      $object = $array['object'];
+      if ($object['type'] == 'pid') {
+        $pids[] = $object['value'];
+      }
+    }
+  }
+  return $pids;
+}
+
+/**
+ * Add relationship between ajaxplorer file and islandora object.
+ *
+ * @param string $parsed_url
+ *   The url in ajaxplorer.
+ * @param FedoraObject $object
+ *   The object that should add relationship
+ */
+function sfudora_ajaxplorer_add_file_object_relationship($parsed_url, $object) {
+  $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
+  if (isset($parsed_url['file'])) {
+    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['file'], TRUE);
+  }
+
+  if (isset($parsed_url['repository'])) {
+    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['repository'], TRUE);
+  }
 }
