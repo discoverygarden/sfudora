@@ -24,7 +24,7 @@ function sfudora_menu() {
   );
   $items['admin/islandora/sfudora'] = array(
     'title' => 'Simon Fraser University Settings',
-    'description' => 'Enter/adjust the values which are by default available in LBL forms.',
+    'description' => 'Configure settings for the sfudora module.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sfudora_admin_form'),
     'access arguments' => array('administer site configuration'),
