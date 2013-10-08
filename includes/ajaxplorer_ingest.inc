@@ -214,7 +214,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   }
   // Store the Fedora Object.
   islandora_add_object($new_object);
-  sfudora_ajaxplorer_add_file_object_relationship($form_state['storage']['download_url'], $new_object);
+  sfudora_ajaxplorer_add_file_object_relationship($form_state['storage']['ajaxplorer_params']['download_query_params']['file'], $form_state['storage']['ajaxplorer_params']['repo_id'], $new_object);
 
   // Delete all Temp files.
   file_unmanaged_delete($temp_obj_file_path);
@@ -395,20 +395,44 @@ function sfudora_ajaxplorer_ingest_parse_url($url) {
 /**
  * Add relationship between ajaxplorer file and islandora object.
  * 
- * @param string $download_url
- *   The url in ajaxplorer.
+ * @param string $file_path
+ *   The path of the file in ajaxplorer.
+ * @param string $repo_id
+ *   The repository Id of the file on ajaxplorer.
  * @param FedoraObject $object
  *   The object that should add relationship
  */
-function sfudora_ajaxplorer_add_file_object_relationship($download_url, $object) {
+function sfudora_ajaxplorer_add_file_object_relationship($file_path, $repo_id, $object) {
   $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
   $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
-  if (isset($parsed_url['query']['file'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['query']['file'], TRUE);
-  }
 
-  if (isset($parsed_url['query']['repository'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['query']['repository'], TRUE);
+  $object->relationships->add(SFUDORA_AJXP_URI, "file", $file_path, TRUE);
 
-  }
+  $object->relationships->add(SFUDORA_AJXP_URI, "repository", $repo_id, TRUE);
+}
+
+/**
+ * Check to see if the objects exists in fedora.
+ * 
+ * @param string $file_path
+ *   The path of the file in ajaxplorer.
+ * @param string $repo_id
+ *   The repository Id of the file on ajaxplorer.
+ */
+function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
+  $repo = islandora_get_tuque_connection();
+
+  $query = "
+    SELECT ?pid
+    FROM <#ri>
+    WHERE 
+    {
+      ?pid <http://ajaxplorer.infofile> \"$file_path\" ; 
+      <http://ajaxplorer.inforepository> \"$repo_id\".
+    }";
+
+  return $repo->repository->ri->sparqlQuery($query);
+
 }
