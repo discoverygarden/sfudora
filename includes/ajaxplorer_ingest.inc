@@ -405,7 +405,7 @@ function sfudora_ajaxplorer_ingest_parse_url($url) {
  *   The object that should add relationship
  */
 function sfudora_ajaxplorer_add_file_object_relationship($file_path, $repo_id, $object) {
-  $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
+
   $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
 
   $object->relationships->add(SFUDORA_AJXP_URI, "file", $file_path, TRUE);
