@@ -277,7 +277,7 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
   module_load_include('inc', 'islandora', 'includes/utilities');
   
   $repo_id = $form_state['storage']['ajaxplorer_params']['repo_id'];
-  if (isset($object_info['parent_collection']) && $object_info['parent_collection'] != 'islandora:root' ) {
+  if (isset($object_info->parent_collection) && $object_info->parent_collection != 'islandora:root' ) {
     $parent_collection = array_pop(sfudora_ajaxplorer_object_check($object_info['parent_collection'], $repo_id));
   }
   else {
@@ -286,7 +286,7 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
   $content_model = isset($object_info->content_model) ? $object_info->content_model : sfudora_ajaxplorer_get_content_model($object_info->filename);
   $new_object = islandora_prepare_new_object("sfu", $object_info->filename, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
   
-  sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $file_path);
+  sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $object_info->uri);
   // Create the DDI datastream.
   sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
   
