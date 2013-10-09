@@ -180,8 +180,9 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   // TODO: We need to determine if single or folder ingest.
   // TODO: We need to determine if object is generic based on file type.
   module_load_include('inc', 'islandora', 'includes/utilities');
-  $content_model = 'sfu:genericCModel';
-  $parent_collection = 'islandora:root';
+  $file_path = $form_state['storage']['ajaxplorer_params']['download_query_params']['file'];
+  $content_model = sfudora_ajaxplorer_get_content_model($file_path);
+  $parent_collection = variable_get('sfudora_repository_pid', 'islandora:root');
 
   // Need to change this to be the metadata title.
   $title = $form_state['values']['titleInfo']['title'];
@@ -218,7 +219,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
 
   // Delete all Temp files.
   file_unmanaged_delete($temp_obj_file_path);
-  drupal_goto('islandora/object/islandora:root');
+  drupal_goto('islandora/object/' . $new_object->id);
 
 }
 
@@ -275,10 +276,11 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
 function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
 
-  $obj_label = 'Generic Record';
+  $file_path = $form_state['storage']['ajaxplorer_params']['download_query_params']['file'];
+  $obj_label = $file_path;
 
   $mime_detect = new MimeDetect();
-  $obj_mimetype = $mime_detect->getMimetype($form_state['storage']['ajaxplorer_params']['download_query_params']['file']);
+  $obj_mimetype = $mime_detect->getMimetype($file_path);
 
   // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
@@ -403,7 +405,7 @@ function sfudora_ajaxplorer_ingest_parse_url($url) {
  *   The object that should add relationship
  */
 function sfudora_ajaxplorer_add_file_object_relationship($file_path, $repo_id, $object) {
-  $parsed_url = sfudora_ajaxplorer_ingest_parse_url($download_url);
+
   $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
 
   $object->relationships->add(SFUDORA_AJXP_URI, "file", $file_path, TRUE);
@@ -418,6 +420,9 @@ function sfudora_ajaxplorer_add_file_object_relationship($file_path, $repo_id, $
  *   The path of the file in ajaxplorer.
  * @param string $repo_id
  *   The repository Id of the file on ajaxplorer.
+ * 
+ * @return array
+ *   Returns the result form the query.
  */
 function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
   module_load_include('inc', 'islandora', 'includes/utilities');
@@ -435,4 +440,78 @@ function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
 
   return $repo->repository->ri->sparqlQuery($query);
 
+}
+
+/**
+ * Function to return the content model based on mimetype.
+ * 
+ * @param string $file
+ *   The file.
+ *
+ * @return string
+ *   Returns the content model to be used.
+ */
+function sfudora_ajaxplorer_get_content_model($file) {
+  module_load_include('inc', 'islandora', 'includes/mime_detect');
+
+  // Get the mimetype of the file.
+  $mime_detect = new MimeDetect();
+  $mimetype = $mime_detect->getMimetype($file);
+
+  // Get all of the enabled solution packs.
+  $connection = islandora_get_tuque_connection();
+  $enabled_solution_packs = module_invoke_all('islandora_required_objects', $connection);
+
+  // Set generic default content model.
+  $content_model = "sfu:genericCModel";
+
+  switch ($mimetype) {
+    // Basic Image.
+    case "image/jpg":
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+      if (isset($enabled_solution_packs['islandora_basic_image'])) {
+        $content_model = "islandora:sp_basic_image";
+      }
+      break;
+
+    // Large Image.
+    case "image/tiff":
+      if (isset($enabled_solution_packs['islandora_large_image'])) {
+        $content_model = "islandora:sp_large_image_cmodel";
+      }
+      break;
+
+    // PDF.
+    case "application/pdf":
+      if (isset($enabled_solution_packs['islandora_pdf'])) {
+        $content_model = "islandora:sp_pdf";
+      }
+      break;
+
+    // Video.
+    case "video/mp4":
+    case "video/quicktime":
+    case "video/m4v":
+    case "video/x-matroska":
+    case "video/ogg":
+      if (isset($enabled_solution_packs['islandora_video'])) {
+        $content_model = "islandora:sp_videoCModel";
+      }
+      break;
+
+    // Audio.
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/x-wav":
+    case "audio/vnd.wave":
+    case "audio/flac":
+      if (isset($enabled_solution_packs['islandora_audio'])) {
+        $content_model = "islandora:sp-audioCModel";
+      }
+      break;
+  }
+
+  return $content_model;
 }
