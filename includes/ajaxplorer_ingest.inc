@@ -133,14 +133,32 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
       ),
     ),
   );
-
+  
   // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
 
+  if ($params['is_dir'] == 'true') {
+    sfudora_ajaxplorer_folder_ingest_form($form, $form_state, $params);
+  }
+  
   return $form;
+}
+
+/**
+ * Hide the title of object ingest form.
+ * 
+ * @param array $params
+ *   The parameters that ajaxplorer passed.
+ */
+function sfudora_ajaxplorer_folder_ingest_form(&$form, &$form_state, $params) {
+  $file = $params['download_query_params']['file'];
+  $path = explode('/', $file);
+  $name = end($path);
+  $form['titleInfo']['title']['#type'] = 'hidden';
+  $form['titleInfo']['title']['#value'] = $name;
 }
 
 
