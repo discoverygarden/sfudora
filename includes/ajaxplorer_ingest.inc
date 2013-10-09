@@ -219,7 +219,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
 
   // Delete all Temp files.
   file_unmanaged_delete($temp_obj_file_path);
-  drupal_goto('islandora/object/islandora:root');
+  drupal_goto('islandora/object/' . $new_object->id);
 
 }
 
