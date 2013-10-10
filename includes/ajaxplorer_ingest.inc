@@ -276,15 +276,14 @@ function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operatio
 function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_info, $result) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   
-  $repo_id = $form_state['storage']['ajaxplorer_params']['repo_id'];
-  if (isset($file_info->parent_collection) && $file_info->parent_collection != 'islandora:root' ) {
+  
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
+  if (isset($file_info->parent_collection) && $file_info->parent_collection != variable_get('sfudora_repository_pid', 'islandora:root') ) {
     $parent_collection = $result['islandora_batch_ingest_object'][$file_info->parent_collection];
   }
-  else {
-    $parent_collection = "islandora:root";
-  }
-  $content_model = isset($file_info->content_model) ? $file_info->content_model : sfudora_ajaxplorer_get_content_model($file_info->filename);
-  $new_object = islandora_prepare_new_object("sfu", $file_info->filename, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+
+  $content_model = isset($file_info->content_model) ? $file_info->content_model : sfudora_ajaxplorer_get_content_model($file_info->file_name);
+  $new_object = islandora_prepare_new_object("sfu", $file_info->file_name, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
   
   if (isset($file_info->is_file) && $file_info->is_file == TRUE) {
     sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $file_info);
@@ -311,6 +310,7 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_inf
     sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
   }
   
+  $repo_id = $form_state['storage']['ajaxplorer_params']['repo_id'];
   sfudora_ajaxplorer_add_file_object_relationship($file_info->ajaxplorer_file_path, $repo_id, $new_object);
   
   islandora_add_object($new_object);
@@ -377,7 +377,7 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
   $obj_ds->label = $file_info->file_name;
   $obj_ds->mimeType = $obj_mimetype;
-  $obj_ds->setContentFromUrl($file_info->uri, FALSE);
+  $obj_ds->setContentFromFile($file_info->uri, FALSE);
   $new_object->ingestDatastream($obj_ds);
 
   return $temp_file_path;
@@ -466,7 +466,7 @@ function sfudora_ajaxplorer_download_file_data($download_url, &$context) {
     sfudora_ajaxplorer_get_folder_data($temp_file_path, $context);
   }
   else {
-    sfudora_ajaxplorer_get_file_data($file_path, $context); 
+    sfudora_ajaxplorer_get_file_data($temp_file_path, $context); 
   }
     
 }
@@ -486,7 +486,7 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
   }
 
   $count = $zip->numFiles;
-  $root_collection = "islandora:root";
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
   
   $files_info = array();
   $collections_info = array();
@@ -532,26 +532,23 @@ function sfudora_ajaxplorer_get_file_data($file_path, &$context) {
 
   $file = drupal_realpath($file_path);
   
-  $root_collection = "islandora:root";
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
   
   $files_info = array();
   $path_info = pathinfo($file);
-
-  // Avoid creating entries for directories and some weird Mac stuff...
-  // XXX: Should be made to take the pattern from
-  // $this::get_pattern(), and to filter the results based on it.
+  
   $file_entry = new stdClass();
   if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {
 
-    $file_entry->dirname = $path_info['dirname'];
-    $file_entry->parent_collection = $root_collection;
-    $file_entry->uri = $file;
-    $file_entry->filename = $path_info['basename'];
-    $file_entry->name = $path_info['filename'];
-    $files_info[$name] = $file_entry;
+    $file_entry->parent_collection = $path_info['dirname'] . '/';
+    $file_entry->ajaxplorer_file_path = $name;
+    $file_entry->is_file = TRUE;
+    $file_entry->file_name = $path_info['basename'];
+    $files_info[] = $file_entry;
   }
  
   $context['results']['files'] = $files_info;
+  $context['results']['temp_zip'] = $file;
 }
 
 
