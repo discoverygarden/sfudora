@@ -273,23 +273,23 @@ function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operatio
  * @return string  
  *   The  new object pid.
  */
-function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_info, $result) {
+function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_info, $result) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   
   $repo_id = $form_state['storage']['ajaxplorer_params']['repo_id'];
-  if (isset($object_info->parent_collection) && $object_info->parent_collection != 'islandora:root' ) {
-    $parent_collection = $result['islandora_batch_ingest_object'][$object_info->parent_collection];
+  if (isset($file_info->parent_collection) && $file_info->parent_collection != 'islandora:root' ) {
+    $parent_collection = $result['islandora_batch_ingest_object'][$file_info->parent_collection];
   }
   else {
     $parent_collection = "islandora:root";
   }
-  $content_model = isset($object_info->content_model) ? $object_info->content_model : sfudora_ajaxplorer_get_content_model($object_info->filename);
-  $new_object = islandora_prepare_new_object("sfu", $object_info->filename, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+  $content_model = isset($file_info->content_model) ? $file_info->content_model : sfudora_ajaxplorer_get_content_model($file_info->filename);
+  $new_object = islandora_prepare_new_object("sfu", $file_info->filename, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
   
-  if (empty(($object_info->is_collection)) {
-  sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $object_info->uri);
-  // Create the DDI datastream.
-  sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
+  if (isset($file_info->is_file) && $file_info->is_file == TRUE) {
+    sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $file_info);
+    // Create the DDI datastream.
+    sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
   }
   
     // Add embargo to this object.
@@ -311,10 +311,47 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
     sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
   }
   
-  sfudora_ajaxplorer_add_file_object_relationship($object_info->ajaxplorer_file_path, $repo_id, $new_object);
+  sfudora_ajaxplorer_add_file_object_relationship($file_info->ajaxplorer_file_path, $repo_id, $new_object);
   
   islandora_add_object($new_object);
   return $new_object->id;
+}
+
+/**
+ * Creates a DDI Datastream.
+ *
+ * @param array $form
+ *   The form.
+ * @param string $form_state
+ *   The form state.
+ * @param object $new_object
+ *   The new Object.
+ */
+function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $new_object) {
+
+  // Make copies of the form and form_state.
+  $ddi_form = $form;
+  $ddi_form_state = $form_state;
+
+  // All of the form values that are not part of the form builder form will be
+  // removed for processing.
+  unset($ddi_form['restrict_options']);
+  unset($ddi_form['embargo_duration']);
+  unset($ddi_form['embargo_date']);
+  unset($ddi_form['xacml']);
+  unset($ddi_form_state['values']['restrict_options']);
+  unset($ddi_form_state['values']['embargo_duration']);
+  unset($ddi_form_state['values']['embargo_date']);
+  unset($ddi_form_state['values']['xacml']);
+
+  // Create the DDI datastream.
+  $xml_form = new XMLForm($ddi_form_state);
+  $ddi_doc = $xml_form->submit($ddi_form, $ddi_form_state);
+  $ddi_ds = $new_object->constructDatastream('DDI', 'M');
+  $ddi_ds->label = 'DDI Record';
+  $ddi_ds->mimeType = 'text/xml';
+  $ddi_ds->setContentFromString($ddi_doc->document->saveXML());
+  $new_object->ingestDatastream($ddi_ds);
 }
 
 /**
@@ -330,20 +367,17 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
  * @return string
  *   Returns the temporary file path of the downloaded file.
  */
-function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object, $file_url) {
+function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object, $file_info) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
 
-  $file_path = $form_state['storage']['ajaxplorer_params']['download_query_params']['file'];
-  $obj_label = $file_path;
-
   $mime_detect = new MimeDetect();
-  $obj_mimetype = $mime_detect->getMimetype($file_path);
+  $obj_mimetype = $mime_detect->getMimetype($file_info->file_name);
 
   // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
-  $obj_ds->label = $obj_label;
+  $obj_ds->label = $file_info->file_name;
   $obj_ds->mimeType = $obj_mimetype;
-  $obj_ds->setContentFromUrl($file_url, FALSE);
+  $obj_ds->setContentFromUrl($file_info->uri, FALSE);
   $new_object->ingestDatastream($obj_ds);
 
   return $temp_file_path;
@@ -464,7 +498,8 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
     $file_entry = new stdClass();
     $file_entry->parent_collection = $path_info['dirname'] . '/';
     $file_entry->ajaxplorer_file_path = $name;
-    $file_entry->filename = $path_info['basename'];
+    $file_entry->is_file = TRUE;
+    $file_entry->file_name = $path_info['basename'];
     
     if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {    
       $file_entry->uri = "zip://$zip_file#$name";
@@ -473,7 +508,6 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
     else {
       $file_entry->parent_collection = $file_entry->parent_collection  == "./" ? $root_collection : $file_entry->parent_collection ;
       $file_entry->content_model = "islandora:collectionCModel";
-      $file_entry->is_collection = TRUE;
       $collections_info[] = $file_entry;
     }
     
