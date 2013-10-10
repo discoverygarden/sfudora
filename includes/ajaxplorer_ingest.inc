@@ -244,8 +244,8 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
   $form_state['storage']['ajaxplorer_params']['is_dir'] = "false";
   $offset = $sandbox['offset'];
   
-  $pid = sfudora_ajaxplorer_ingest_single_object($form, $form_state, $files[$offset]);
-  $result['islandora_batch_ingest_object']["/" . $entry_name] = $pid;
+  $pid = sfudora_ajaxplorer_ingest_single_object($form, $form_state, $files[$offset], $result);
+  $result['islandora_batch_ingest_object'][$files[$offset]->ajaxplorer_file_path] = $pid;
   $sandbox['offset']++;
   
   if ($sandbox['offset'] >= $sandbox['total']) {
@@ -273,12 +273,12 @@ function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operatio
  * @return string  
  *   The  new object pid.
  */
-function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_info) {
+function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_info, $result) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   
   $repo_id = $form_state['storage']['ajaxplorer_params']['repo_id'];
   if (isset($object_info->parent_collection) && $object_info->parent_collection != 'islandora:root' ) {
-    $parent_collection = array_pop(sfudora_ajaxplorer_object_check($object_info['parent_collection'], $repo_id));
+    $parent_collection = $result['islandora_batch_ingest_object'][$object_info->parent_collection];
   }
   else {
     $parent_collection = "islandora:root";
@@ -309,10 +309,10 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
     sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
   }
   
-  sfudora_ajaxplorer_add_file_object_relationship($object_info['parent_collection'], $repo_id, $new_object);
+  sfudora_ajaxplorer_add_file_object_relationship($object_info->ajaxplorer_file_path, $repo_id, $new_object);
   
   islandora_add_object($new_object);
-  
+  return $new_object->id;
 }
 
 /**
@@ -461,23 +461,22 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
     $path_info = pathinfo($name);
 
     $file_entry = new stdClass();
-    $file_entry->dirname = $path_info['dirname'];
-    $file_entry->parent_collection = array_pop(explode("/", $path_info['dirname']));
-    $file_entry->file = $name;
+    $file_entry->parent_collection = $path_info['dirname'];
+    $file_entry->ajaxplorer_file_path = $name;
     $file_entry->filename = $path_info['basename'];
     
     if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {    
       $file_entry->uri = "zip://$zip_file#$name";
-      $files_info[$name] = $file_entry;
+      $files_info[] = $file_entry;
     }
     else {
       $file_entry->parent_collection = $file_entry->parent_collection  == "." ? $root_collection : $file_entry->parent_collection ;
       $file_entry->content_model = "islandora:collectionCModel";  
-      $collections_info[$name] = $file_entry;
+      $collections_info[] = $file_entry;
     }
     
   }
-  
+
   $files_info = array_merge($collections_info, $files_info);
   
   $zip->close();
