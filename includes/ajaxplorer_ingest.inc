@@ -286,9 +286,11 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
   $content_model = isset($object_info->content_model) ? $object_info->content_model : sfudora_ajaxplorer_get_content_model($object_info->filename);
   $new_object = islandora_prepare_new_object("sfu", $object_info->filename, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
   
+  if (empty(($object_info->is_collection)) {
   sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $object_info->uri);
   // Create the DDI datastream.
   sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
+  }
   
     // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
@@ -328,7 +330,7 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $object_i
  * @return string
  *   Returns the temporary file path of the downloaded file.
  */
-function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object) {
+function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object, $file_url) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
 
   $file_path = $form_state['storage']['ajaxplorer_params']['download_query_params']['file'];
@@ -341,8 +343,7 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
   $obj_ds->label = $obj_label;
   $obj_ds->mimeType = $obj_mimetype;
-  $temp_file_path = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
-  $obj_ds->setContentFromFile($temp_file_path, FALSE);
+  $obj_ds->setContentFromUrl($file_url, FALSE);
   $new_object->ingestDatastream($obj_ds);
 
   return $temp_file_path;
@@ -461,7 +462,7 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
     $path_info = pathinfo($name);
 
     $file_entry = new stdClass();
-    $file_entry->parent_collection = $path_info['dirname'];
+    $file_entry->parent_collection = $path_info['dirname'] . '/';
     $file_entry->ajaxplorer_file_path = $name;
     $file_entry->filename = $path_info['basename'];
     
@@ -470,8 +471,9 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
       $files_info[] = $file_entry;
     }
     else {
-      $file_entry->parent_collection = $file_entry->parent_collection  == "." ? $root_collection : $file_entry->parent_collection ;
-      $file_entry->content_model = "islandora:collectionCModel";  
+      $file_entry->parent_collection = $file_entry->parent_collection  == "./" ? $root_collection : $file_entry->parent_collection ;
+      $file_entry->content_model = "islandora:collectionCModel";
+      $file_entry->is_collection = TRUE;
       $collections_info[] = $file_entry;
     }
     
