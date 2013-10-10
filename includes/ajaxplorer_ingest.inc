@@ -277,8 +277,8 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_inf
   module_load_include('inc', 'islandora', 'includes/utilities');
   
   
-  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
-  if (isset($file_info->parent_collection) && $file_info->parent_collection != variable_get('sfudora_repository_pid', 'islandora:root') ) {
+  $parent_collection = variable_get('sfudora_repository_pid', 'islandora:root');
+  if (isset($file_info->parent_collection) && $file_info->parent_collection != $parent_collection ) {
     $parent_collection = $result['islandora_batch_ingest_object'][$file_info->parent_collection];
   }
 
