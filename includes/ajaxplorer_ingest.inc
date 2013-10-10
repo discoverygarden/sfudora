@@ -205,7 +205,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   
   $batch = array(
       'operations' => array(
-        array('sfudora_ajaxplorer_download_file_data', array($download_url)),
+        array('sfudora_ajaxplorer_download_file_data', array($params, $download_url)),
         array('sfudora_ajaxplorer_ingest_object_batch',
           array($form, $form_state)),
       ),
@@ -276,16 +276,20 @@ function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operatio
 function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_info, $result) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   
-  
   $parent_collection = variable_get('sfudora_repository_pid', 'islandora:root');
   if (isset($file_info->parent_collection) && $file_info->parent_collection != $parent_collection ) {
     $parent_collection = $result['islandora_batch_ingest_object'][$file_info->parent_collection];
   }
+  
 
+  $title = isset($file_info->file_name) ? $file_info->file_name : $form_state['values']['titleInfo']['title'];
+  $file_info->file_name = isset($file_info->file_name) ? $file_info->file_name : $file_info->ajaxplorer_file_path;
+  
   $content_model = isset($file_info->content_model) ? $file_info->content_model : sfudora_ajaxplorer_get_content_model($file_info->file_name);
-  $new_object = islandora_prepare_new_object("sfu", $file_info->file_name, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+  $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
   
   if (isset($file_info->is_file) && $file_info->is_file == TRUE) {
+    
     sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $file_info);
     // Create the DDI datastream.
     sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
@@ -431,7 +435,7 @@ function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
  * @returns string $temp_file_path
  *   The path of the file in the tmp directory.
  */
-function sfudora_ajaxplorer_download_file_data($download_url, &$context) {
+function sfudora_ajaxplorer_download_file_data($params, $download_url, &$context) {
   $context['message'] = t('Downloading Content.');
   // Get the path info of the download_url
   $download_url_path_info = pathInfo($download_url);
@@ -466,7 +470,7 @@ function sfudora_ajaxplorer_download_file_data($download_url, &$context) {
     sfudora_ajaxplorer_get_folder_data($temp_file_path, $context);
   }
   else {
-    sfudora_ajaxplorer_get_file_data($temp_file_path, $context); 
+    sfudora_ajaxplorer_get_file_data($params, $temp_file_path, $context); 
   }
     
 }
@@ -528,7 +532,7 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
  *   The download url in ajaxplorer.
  */
     
-function sfudora_ajaxplorer_get_file_data($file_path, &$context) {
+function sfudora_ajaxplorer_get_file_data($params, $file_path, &$context) {
 
   $file = drupal_realpath($file_path);
   
@@ -540,10 +544,9 @@ function sfudora_ajaxplorer_get_file_data($file_path, &$context) {
   $file_entry = new stdClass();
   if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {
 
-    $file_entry->parent_collection = $path_info['dirname'] . '/';
-    $file_entry->ajaxplorer_file_path = $name;
+    $file_entry->parent_collection = $root_collection;
+    $file_entry->ajaxplorer_file_path = $params['download_query_params']['file'];
     $file_entry->is_file = TRUE;
-    $file_entry->file_name = $path_info['basename'];
     $files_info[] = $file_entry;
   }
  
