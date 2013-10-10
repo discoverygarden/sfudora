@@ -539,17 +539,12 @@ function sfudora_ajaxplorer_get_file_data($params, $file_path, &$context) {
   $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
 
   $files_info = array();
-  $path_info = pathinfo($file);
-
   $file_entry = new stdClass();
-  if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {
-
-    $file_entry->parent_collection = $root_collection;
-    $file_entry->ajaxplorer_file_path = $params['download_query_params']['file'];
-    $file_entry->is_file = TRUE;
-    $file_entry->uri = $file;
-    $files_info[] = $file_entry;
-  }
+  $file_entry->parent_collection = $root_collection;
+  $file_entry->ajaxplorer_file_path = $params['download_query_params']['file'];
+  $file_entry->is_file = TRUE;
+  $file_entry->uri = $file;
+  $files_info[] = $file_entry;
 
   $context['results']['files'] = $files_info;
   $context['results']['temp_zip'] = $file;
