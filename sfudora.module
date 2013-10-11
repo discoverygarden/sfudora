@@ -8,7 +8,7 @@
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
 define('SFUDORA_XACML_FOLDER', '/xacml');
 define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
-
+define('SFUDORA_AJXP_FRAME','sfudora/ajaxplorer');
 /**
  * Implements hook_menu().
  */
@@ -20,6 +20,12 @@ function sfudora_menu() {
     'access callback' => TRUE,
     'page callback' => 'sfudora_ajaxplorer_ingest',
     'file' => 'includes/ajaxplorer_ingest.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items[SFUDORA_AJXP_FRAME] = array (
+    'title'=> 'SFU Ajaxplorer Frame',
+    'access callback' => TRUE,
+    'page callback' => 'sfudora_ajaxplorer_frame',
     'type' => MENU_CALLBACK,
   );
   $items['admin/islandora/sfudora'] = array(
@@ -58,4 +64,16 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
       ),
     ),
   );
+}
+
+function sfudora_ajaxplorer_frame()
+{
+  drupal_set_title("AjaXplorer");
+  $output = array();
+  $serverBaseURL=$_SERVER['HTTP_HOST'];
+  $sfu_path = "http://".$serverBaseURL."/".variable_get('ajxp_path', 'ajaxplorer');
+  $output['Simon Fraser University AjaXplorer'] = array (
+     '#markup' =>"<iframe id=\"ajaxplorer\" box_width=\"825\" width=\"800\" height=\"400\" src=\"$sfu_path\"></iframe>", 
+  ) ;
+  return $output;
 }
