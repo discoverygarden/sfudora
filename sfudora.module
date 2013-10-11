@@ -71,11 +71,12 @@ function sfudora_ajaxplorer_frame()
   drupal_set_title("AjaXplorer");
   $output = array();
   $module_path = drupal_get_path('module','sfudora');
-  drupal_add_js("$module_path/js/ajaxplorer_frame");
+  drupal_add_js("$module_path/js/ajaxplorer_frame.js");
+  drupal_add_css("$module_path/css/ajaxplorer_frame.css");
   $serverBaseURL=$_SERVER['HTTP_HOST'];
   $sfu_path = "http://".$serverBaseURL."/".variable_get('ajxp_path', 'ajaxplorer');
   $output['Simon Fraser University AjaXplorer'] = array (
-     '#markup' =>"<iframe id=\"ajaxplorer_frame\" box_width=\"825\" width=\"800\" height=\"400\" src=\"$sfu_path\"></iframe>", 
+     '#markup' =>"<iframe id=\"ajaxplorer_frame\" src=\"$sfu_path\"></iframe>", 
   ) ;
   return $output;
 }

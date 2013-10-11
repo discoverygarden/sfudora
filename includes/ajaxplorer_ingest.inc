@@ -193,7 +193,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     'finished' => 'sfudora_ajaxplorer_ingest_object_finished',
   );
   batch_set($batch);
-  batch_process("/islandora/object/islandora:root");
+  batch_process("/sfudora/ajaxplorer");
 }
 
 /**
@@ -234,7 +234,7 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
 function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operations) {
   if ($success) {
     $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
-    drupal_goto('islandora/object/' . $root_collection);
+    drupal_goto('/sfudora/ajaxplorer');
   }
 }
 
