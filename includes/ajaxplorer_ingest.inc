@@ -161,7 +161,6 @@ function sfudora_ajaxplorer_folder_ingest_form(&$form, &$form_state, $params) {
   $form['titleInfo']['title']['#value'] = $name;
 }
 
-
 /**
  * Form validation function.
  */
@@ -184,7 +183,6 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
       }
       $form['embargo'] = $newembargo;
     }
-
   }
 }
 
@@ -207,7 +205,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $batch = array(
     'operations' => array(
       array('sfudora_ajaxplorer_download_file_data', array(
-        $params, $download_url)),
+          $params, $download_url)),
       array('sfudora_ajaxplorer_ingest_object_batch',
         array($form, $form_state)),
     ),
@@ -305,10 +303,9 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_inf
     // Create the DDI datastream.
     sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
   }
-  $is_dir = ($content_model=='islandora:collectionCModel')?TRUE:FALSE;
-  dsm($content_model,$is_dir);
-  if($is_dir) {
-    sfudora_ajaxplorer_ingest_create_policy_datastream($form, $form_state, $new_object, $file_info);
+  $is_dir = ($content_model == 'islandora:collectionCModel') ? TRUE : FALSE;
+  if ($is_dir) {
+    sfudora_ajaxplorer_ingest_create_policy_datastream($form, $form_state, $new_object, $parent_collection);
   }
   // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
@@ -377,18 +374,28 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
   $new_object->ingestDatastream($ddi_ds);
 }
 
-function sfudora_ajaxplorer_ingest_create_policy_datastream(&$form, &$form_state, $new_object, $file_info) {
-  $parent = $file_info->parent_collection;
+/**
+ * Creates a COLLECTION_POLICY Datastream.
+ *
+ * @param array $form
+ *   The form.
+ * @param string $form_state
+ *   The form state.
+ * @param object $new_object
+ *   The new Object.
+ * @param string $parent_collection 
+ *   The parent collection
+ */
+function sfudora_ajaxplorer_ingest_create_policy_datastream(&$form, &$form_state, $new_object, $parent_collection) {
+  $parent = $parent_collection;
   $collection = islandora_object_load($parent);
   $policy_xml = $collection['COLLECTION_POLICY']->content;
-  dsm($policy_xml);
   $policy = new CollectionPolicy($policy_xml);
-  dsm($policy->getXML());
   // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('COLLECTION_POLICY', 'M');
   $obj_ds->label = 'COLLECTION_POLICY';
   $obj_ds->mimeType = 'text/xml';
-  $obj_ds->setContentFromFile($policy->getXML(), FALSE);
+  $obj_ds->setContentFromString($policy->getXML(), FALSE);
   $new_object->ingestDatastream($obj_ds);
 }
 
@@ -405,8 +412,6 @@ function sfudora_ajaxplorer_ingest_create_policy_datastream(&$form, &$form_state
  * @return string
  *   Returns the temporary file path of the downloaded file.
  */
-
-
 function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object, $file_info) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
 
@@ -544,7 +549,6 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
       $file_entry->content_model = "islandora:collectionCModel";
       $collections_info[] = $file_entry;
     }
-
   }
 
   $files_info = array_merge($collections_info, $files_info);
