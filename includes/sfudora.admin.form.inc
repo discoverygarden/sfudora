@@ -27,6 +27,14 @@ function sfudora_admin_form($form, &$form_state) {
     '#description' => t('The PID of the Root Collection Object'),
     '#required' => TRUE,
   );
+  
+  $form['ajxp_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ajaxplorer path'),
+    '#default_value' => variable_get('ajxp_path', 'ajaxplorer/'),
+    '#description' => t('The ajxplorer path on this server'),
+    '#required' => TRUE,
+  );
 
   // Set a specific callback for the submit button.
   $form['submit'] = array(
