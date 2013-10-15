@@ -10,11 +10,11 @@
  *
  * A few $_GET parameters we care about:
  * - is_dir: Whether the file to we're ingesting is actually a direcotry of
- * files.
+ *   files.
  * - download_base_url: Where to hit Ajaxplorer.
  * - download_query_params: URL-encoded parameters to throw back at Ajaxplorer
- * when we go to download whatever resource. We'll parse 'em into an
- * associative array so they're easier to use later.
+ *   when we go to download whatever resource. We'll parse 'em into an
+ *   associative array so they're easier to use later.
  *
  * @return array
  *   A form, 'cause forms are awesome.
@@ -32,7 +32,7 @@ function sfudora_ajaxplorer_ingest() {
   // the site.
   $js = <<<EOJS
   jQuery(document).ready(function() {
-    to_show = jQuery('#block-system-main, #block-system-main *').parentsUntil('body').andSelf();
+    to_show = jQuery('#block-system-main *, #messages *').parentsUntil('body').andSelf();
     jQuery('body *').not(to_show).hide();
     jQuery('body').removeClass('admin-menu');
   });
@@ -133,24 +133,27 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
       ),
     ),
   );
+
+  // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Ingest'),
+    '#value' => t('Submit'),
   );
 
   if ($params['is_dir'] == 'true') {
-    sfudora_ajaxplorer_foulder_ingest_form($form, $form_state, $params);
+    sfudora_ajaxplorer_folder_ingest_form($form, $form_state, $params);
   }
+
   return $form;
 }
 
 /**
  * Hide the title of object ingest form.
- * 
+ *
  * @param array $params
  *   The parameters that ajaxplorer passed.
  */
-function sfudora_ajaxplorer_foulder_ingest_form(&$form, &$form_state, $params) {
+function sfudora_ajaxplorer_folder_ingest_form(&$form, &$form_state, $params) {
   $file = $params['download_query_params']['file'];
   $path = explode('/', $file);
   $name = end($path);
@@ -158,78 +161,6 @@ function sfudora_ajaxplorer_foulder_ingest_form(&$form, &$form_state, $params) {
   $form['titleInfo']['title']['#value'] = $name;
 }
 
-/**
- * Prepair a single object and add it to the new object array.
- * 
- * @param string $parent_collection
- *   The collection that the object should be ingested into.
- * 
- * @return string  
- *   The  new object pid.
- */
-function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $parent_collection = 'islandora:root') {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $content_model = 'sfu:genericCModel';
-
-  // Need to change this to be the metadata title.
-  $title = $form_state['values']['titleInfo']['title'];
-  if (isset($form_state['storage']['ajaxplorer_params']['is_dir']) &&
-      $form_state['storage']['ajaxplorer_params']['is_dir'] == "true") {
-    $content_model = 'islandora:collectionCModel';
-  }
-  // Create the new Fedora Object.
-  $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
-
-  // Create the OBJ datastream.
-  $file_path = "";
-  if (isset($form_state['storage']['download_url'])) {
-    $file_data = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url']);
-    $file_path = drupal_realpath($file_data['path']);
-  }
-  else {
-    $file_path = $form_state['storage']['url'];
-  }
-  sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $file_path);
-  // Create the DDI datastream.
-  sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
-
-  // Add embargo to this object.
-  if (isset($form_state['values']['restrict_options']) &&
-      $form_state['values']['restrict_options'] == 'embargo') {
-    if (isset($form_state['values']['embargo_date']) &&
-        isset($form_state['values']['embargo_duration']) &&
-        $form_state['values']['embargo_duration'] == 'finite') {
-      $embargo_date = $form_state['values']['embargo_date'];
-    }
-    else {
-      $embargo_date = "indefinite";
-    }
-    sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
-  }
-
-  if (isset($form_state['values']['restrict_options']) &&
-      $form_state['values']['restrict_options'] == 'xacml') {
-    sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
-  }
-
-  $param = $form_state['storage']['ajaxplorer_params'];
-  $ajax_url = "";
-  if (isset($form_state['storage']['download_url'])) {
-    $ajax_url = $param['download_query_params'];
-  }
-  else {
-    $file_path = explode('/', $param['download_query_params']['file']);
-    $root_path = "";
-    for ($i = 0; $i < count($file_path) - 1; $i++) {
-      $root_path .= $file_path[$i] . '/';
-    }
-    $param['download_query_params']['file'] = str_replace(file_directory_temp() . "/", $root_path, $form_state['storage']['url']);
-    $ajax_url = $param['download_query_params'];
-  }
-  sfudora_ajaxplorer_add_file_object_relationship($ajax_url, $new_object);
-  islandora_add_object($new_object);
-  return $new_object->id;
-}
 
 /**
  * Form validation function.
@@ -253,6 +184,7 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
       }
       $form['embargo'] = $newembargo;
     }
+
   }
 }
 
@@ -260,11 +192,8 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
  * Form submission function.
  */
 function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
-  // TODO: Do the XML form validation stuff to get the output XML.
-  // TODO: Actually create objects... If we're a folder, download the ZIP,
-  // iterate over all the contents, creating objects as necessary.
-  // TODO: We need to determine if single or folder ingest.
-  // TODO: We need to determine if object is generic based on file type.
+
+  // Get the ajaxplorer params.
   $params = $form_state['storage']['ajaxplorer_params'];
   $download_url = "";
   if (isset($form_state['storage']['download_url'])) {
@@ -273,63 +202,31 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   else {
     drupal_set_message(t("Download Url not exist"), "Error");
   }
-  if (isset($params['is_dir']) && $params['is_dir'] == "true") {
-    $batch = array(
-      'operations' => array(
-        array('sfudora_ajaxplorer_get_folder', array($download_url)),
-        array('sfudora_ajaxplorer_ingest_object_batch',
-          array($form, $form_state)),
-      ),
-      'title' => t('SFU Ingest'),
-      'init_message' => t('Ingest from Ajaxplorer'),
-      'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
-      'error_message' => t('An error has occurred.'),
-      'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
-      'finished' => 'sfudora_ajaxplorer_ingest_object_finished',
-    );
-    batch_set($batch);
-    batch_process("/islandora/object/islandora:root");
-  }
-  else {
-    sfudora_ajaxplorer_ingest_single_object($form, $form_state);
-  }
-}
 
-/**
- * Get the folder information.
- * 
- * @param string $download_url
- *   The download url in ajaxplorer.
- */
-function sfudora_ajaxplorer_get_folder($download_url, &$context) {
-  $context['message'] = t('Downloading folders.');
-  $file_data = sfudora_ajaxplorer_get_file_data($download_url);
-  $zip_file = drupal_realpath($file_data['path']);
-  $zip = new ZipArchive();
-  $files = array();
-  if ($zip->open($zip_file)) {
-    $zip->extractTo(file_directory_temp());
-    $zip->close();
-  }
-
-  $zip = zip_open($zip_file);
-  if ($zip) {
-    while ($file = zip_read($zip)) {
-      $files[] = zip_entry_name($file);
-    }
-    zip_close($zip);
-  }
-
-  $context['results']['sfudora_folder_files'] = $files;
-  $context['results']['temp_zip'] = $zip_file;
-  $context['results']['temp_folder'] = file_directory_temp() . "/" . $files[0];
+  // Set up a batch operation.
+  $batch = array(
+    'operations' => array(
+      array('sfudora_ajaxplorer_download_file_data', array(
+        $params, $download_url)),
+      array('sfudora_ajaxplorer_ingest_object_batch',
+        array($form, $form_state)),
+    ),
+    'title' => t('SFU Ingest'),
+    'init_message' => t('Ingest from Ajaxplorer'),
+    'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
+    'error_message' => t('An error has occurred.'),
+    'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
+    'finished' => 'sfudora_ajaxplorer_ingest_object_finished',
+  );
+  batch_set($batch);
+  batch_process("/islandora/object/islandora:root");
 }
 
 /**
  * The batch process of ingest object.
  */
 function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
-  $files = $context['results']['sfudora_folder_files'];
+  $files = $context['results']['files'];
   $result = &$context['results'];
   $sandbox = &$context['sandbox'];
   if (!isset($sandbox['offset'])) {
@@ -345,34 +242,14 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
   ));
   $form_state['storage']['ajaxplorer_params']['is_dir'] = "false";
   $offset = $sandbox['offset'];
-  $entry_name = $files[$offset];
-  $file_name = explode("/", $entry_name);
-  $name_num = count($file_name) - 1;
-  if (!$file_name[$name_num]) {
-    unset($file_name[$name_num]);
-    $form_state['storage']['ajaxplorer_params']['is_dir'] = "true";
-  }
-  $collection = "/";
-  for ($i = 0; $i < count($file_name) - 1; $i++) {
-    $collection .= $file_name[$i] . "/";
-  }
-  if (isset($result['islandora_batch_ingest_object'][$collection])) {
-    $collection = $result['islandora_batch_ingest_object'][$collection];
-  }
-  else {
-    $collection = "islandora:root";
-  }
-  $name = end($file_name);
-  $form['titleInfo']['title']['#value'] = $name;
-  $form_state['values']['titleInfo']['title'] = $name;
-  unset($form_state['storage']['download_url']);
-  $form_state['storage']['url'] = file_directory_temp() . "/" . $entry_name;
-  $pid = sfudora_ajaxplorer_ingest_single_object($form, $form_state, $collection);
-  $result['islandora_batch_ingest_object']["/" . $entry_name] = $pid;
+
+  $pid = sfudora_ajaxplorer_ingest_single_object($form, $form_state, $files[$offset], $result);
+  $result['islandora_batch_ingest_object'][$files[$offset]->ajaxplorer_file_path] = $pid;
   $sandbox['offset']++;
+
   if ($sandbox['offset'] >= $sandbox['total']) {
-    file_unmanaged_delete($context['results']['temp_zip']);
-    file_unmanaged_delete_recursive($context['results']['temp_folder']);
+    file_unmanaged_delete($context['results']['files']);
+    file_unmanaged_delete_recursive($context['results']['temp_zip']);
   }
   $context['finished'] = $sandbox['offset'] / $sandbox['total'];
 }
@@ -382,24 +259,85 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
  */
 function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operations) {
   if ($success) {
-    drupal_goto('islandora/object/islandora:root');
+    $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
+    drupal_goto('islandora/object/' . $root_collection);
   }
 }
 
 /**
- * Get folder data using curl.
+ * Ingest a single object into fedora.
+ *
+ * @param array $form
+ *   The form.
+ * @param string $form_state
+ *   The form state.
+ * @param string $file_info
+ *   Information on the file. ex file paths, file name, parent collection etc.
+ *
+ * @return string
+ *   The new object pid.
  */
-function sfudora_ajaxplorer_ingest_folder_get_data(&$form, &$form_state) {
-  $folder = sfudora_ajaxplorer_get_file_data($form_state['storage']['download_url'], TRUE);
-  $zip = new ZipArchive();
-  $zip_file = drupal_realpath($folder);
-  if (($error = $zip->open($zip_file)) !== TRUE) {
-    drupal_set_message(t("error occured when unzip the file"), "error");
+function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_info, $result) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
+  $parent_collection = variable_get('sfudora_repository_pid', 'islandora:root');
+  // If the parent collection is not sfudora root then find the pid of the
+  // parent collection.
+  if (isset($file_info->parent_collection) && $file_info->parent_collection != $parent_collection) {
+    $parent_collection = $result['islandora_batch_ingest_object'][$file_info->parent_collection];
   }
-  $tmp_folder = file_directory_temp() . '/' . $form_state['values']['titleInfo']['title'];
-  $zip->extractTo(file_directory_temp());
-  $zip->close();
-  return array('tmp_folder' => $tmp_folder, 'zip_file' => $zip_file);
+
+  // Depending if the the batch is a single file or folder, the title will be
+  // either the form title or the file name.
+  $title = isset($file_info->file_name) ? $file_info->file_name : $form_state['values']['titleInfo']['title'];
+
+  // Set the file name to be the file info file name or the ajaxplorer
+  // file path.
+  $file_info->file_name = isset($file_info->file_name) ? $file_info->file_name : $file_info->ajaxplorer_file_path;
+
+  $content_model = isset($file_info->content_model) ? $file_info->content_model : sfudora_ajaxplorer_get_content_model($file_info->file_name);
+  $new_object = islandora_prepare_new_object("sfu", $title, array(), array($content_model), array(array('relationship' => 'isMemberOfCollection', 'pid' => $parent_collection)));
+
+  // If the object is a file then add the OBJ and DDI datastream.
+  if (isset($file_info->is_file) && $file_info->is_file == TRUE) {
+    // Create OBJ datastream.
+    sfudora_ajaxplorer_ingest_create_obj_datastream($form, $form_state, $new_object, $file_info);
+    // Create the DDI datastream.
+    sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
+  }
+  $is_dir = ($content_model=='islandora:collectionCModel')?TRUE:FALSE;
+  dsm($content_model,$is_dir);
+  if($is_dir) {
+    sfudora_ajaxplorer_ingest_create_policy_datastream($form, $form_state, $new_object, $file_info);
+  }
+  // Add embargo to this object.
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'embargo') {
+    if (isset($form_state['values']['embargo_date']) &&
+        isset($form_state['values']['embargo_duration']) &&
+        $form_state['values']['embargo_duration'] == 'finite') {
+      $embargo_date = $form_state['values']['embargo_date'];
+    }
+    else {
+      $embargo_date = "indefinite";
+    }
+    sfudora_ajaxplorer_ingest_set_embargo(array($new_object), $embargo_date);
+  }
+
+  // Set the xacml policy datastream.
+  if (isset($form_state['values']['restrict_options']) &&
+      $form_state['values']['restrict_options'] == 'xacml') {
+    sfudora_ajaxplorer_ingest_set_xacml($new_object, $form_state['values']['xacml']);
+  }
+
+  // Add the ajaxplorer file path and repository id to RELS-EXT
+  $repo_id = $form_state['storage']['ajaxplorer_params']['repo_id'];
+  sfudora_ajaxplorer_add_file_object_relationship($file_info->ajaxplorer_file_path, $repo_id, $new_object);
+
+  // Add object.
+  islandora_add_object($new_object);
+  // Return the new object pid.
+  return $new_object->id;
 }
 
 /**
@@ -439,6 +377,21 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
   $new_object->ingestDatastream($ddi_ds);
 }
 
+function sfudora_ajaxplorer_ingest_create_policy_datastream(&$form, &$form_state, $new_object, $file_info) {
+  $parent = $file_info->parent_collection;
+  $collection = islandora_object_load($parent);
+  $policy_xml = $collection['COLLECTION_POLICY']->content;
+  dsm($policy_xml);
+  $policy = new CollectionPolicy($policy_xml);
+  dsm($policy->getXML());
+  // Create the OBJ datastream.
+  $obj_ds = $new_object->constructDatastream('COLLECTION_POLICY', 'M');
+  $obj_ds->label = 'COLLECTION_POLICY';
+  $obj_ds->mimeType = 'text/xml';
+  $obj_ds->setContentFromFile($policy->getXML(), FALSE);
+  $new_object->ingestDatastream($obj_ds);
+}
+
 /**
  * Creates a OBJ Datastream.
  *
@@ -448,21 +401,26 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
  *   The form state.
  * @param object $new_object
  *   The new Object.
+ *
+ * @return string
+ *   Returns the temporary file path of the downloaded file.
  */
-function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object, $file_path) {
+
+
+function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $new_object, $file_info) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
 
-  $obj_label = 'Generic Record';
-
   $mime_detect = new MimeDetect();
-  $obj_mimetype = $mime_detect->getMimetype($form_state['storage']['ajaxplorer_params']['download_query_params']['file']);
+  $obj_mimetype = $mime_detect->getMimetype($file_info->file_name);
 
   // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('OBJ', 'M');
-  $obj_ds->label = $obj_label;
+  $obj_ds->label = $file_info->file_name;
   $obj_ds->mimeType = $obj_mimetype;
-  $obj_ds->setContentFromFile($file_path);
+  $obj_ds->setContentFromFile($file_info->uri, FALSE);
   $new_object->ingestDatastream($obj_ds);
+
+  return $temp_file_path;
 }
 
 /**
@@ -483,24 +441,21 @@ function sfudora_ajaxplorer_ingest_set_embargo($objects, $end = "indefinite") {
 /**
  * Add the xacml to an object.
  *
- * @param string|AbstractObject $objects
+ * @param string|AbstractObject $object
  *   The object (or its pid) that the xacml should be added to
  * @param string $xacml
  *   The real path pf the xacml file.
  */
-function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
-  foreach ($objects as $object) {
-    if (is_string($object)) {
-      $object = islandora_object_load($object);
-    }
-    $xacml_ds = $object->constructDatastream('POLICY', 'X');
-    $xacml_ds->setContentFromFile($xacml);
-    $xacml_ds->label = "XACML Policy Stream";
-    if ($object->getDatastream('POLICY')) {
-      $object->purgeDatastream('POLICY');
-    }
-    $object->ingestDatastream($xacml_ds);
+function sfudora_ajaxplorer_ingest_set_xacml($object, $xacml) {
+
+  $xacml_ds = $object->constructDatastream('POLICY', 'X');
+  $xacml_ds->setContentFromFile($xacml);
+  $xacml_ds->label = "XACML Policy Stream";
+  if ($object->getDatastream('POLICY')) {
+    $object->purgeDatastream('POLICY');
   }
+
+  $object->ingestDatastream($xacml_ds);
 }
 
 /**
@@ -509,10 +464,15 @@ function sfudora_ajaxplorer_ingest_set_xacml($objects, $xacml) {
  * @param AbstractObject|string $download_url
  *   The url of the file to load.
  *
- * @returns string $file_data
- *   The file data as a string.
+ * @returns string $temp_file_path
+ *   The path of the file in the tmp directory.
  */
-function sfudora_ajaxplorer_get_file_data($download_url) {
+function sfudora_ajaxplorer_download_file_data($params, $download_url, &$context) {
+  $context['message'] = t('Downloading Content.');
+  // Get the path info of the download_url
+  $download_url_path_info = pathinfo($download_url);
+  // Check to see if the file is a zip file.
+  $is_zip_file = $is_single_file = isset($download_url_path_info['extension']) ? FALSE : TRUE;
 
   // We want to pass the cookie information.
   $temparray = array();
@@ -532,69 +492,213 @@ function sfudora_ajaxplorer_get_file_data($download_url) {
   curl_setopt($ch, CURLOPT_TIMEOUT, 50);
   curl_setopt($ch, CURLOPT_FILE, $fp);
   curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-  // Store the response into the variable $file_data.
   curl_exec($ch);
-  $info = curl_getinfo($ch);
   curl_close($ch);
   fclose($fp);
 
-  return array("path" => $temp_file_path, "info" => $info);
+  if ($is_zip_file) {
+    // Creates file and collection arrays, storing in the context results.
+    sfudora_ajaxplorer_get_folder_data($temp_file_path, $context);
+  }
+  else {
+    sfudora_ajaxplorer_get_file_data($params, $temp_file_path, $context);
+  }
 }
 
 /**
- * Get an array of object which is related to the ajaxplorer file.
- * 
- * @param string $repo
- *   The ajaxplorer id to search.
- * @param string $file
- *   The ajaxplorer file path to search.
- * @param string $search_root
- *   The root file of the repository.
- * 
- * @return array
- *   An array of result pid.
+ * Get the folder information.
+ *
+ * @param string $file_data
+ *   The download url in ajaxplorer.
  */
-function sfudora_ajaxplorer_get_object($repo = FALSE, $file = FALSE, $search_root = 'islandora:root') {
-  $object = islandora_object_load($search_root);
-  if (!($repo === FALSE) && $file) {
-    $query = "SELECT ?object from <#ri>
-      WHERE {?object <http://ajaxplorer.info#file> \"" . $file . "\".
-       ?object <http://ajaxplorer.info#repository> \"" . $repo . "\".
-  }";
+function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
+
+  $zip = new ZipArchive();
+  $zip_file = drupal_realpath($file_data);
+  if (($error = $zip->open($zip_file)) !== TRUE) {
+    return FALSE;
   }
-  elseif ($file) {
-    $query = "SELECT ?object from <#ri>
-      WHERE {?object <http://ajaxplorer.info#file> \"" . $file . "\".
-  }";
-  }
-  $result = $object->repository->ri->query($query, 'sparql');
-  $pids = array();
-  foreach ($result as $array) {
-    if (isset($array['object'])) {
-      $object = $array['object'];
-      if ($object['type'] == 'pid') {
-        $pids[] = $object['value'];
-      }
+
+  $count = $zip->numFiles;
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
+
+  $files_info = array();
+  $collections_info = array();
+
+  for ($i = 0; $i < $count; $i++) {
+    $name = $zip->getNameIndex($i);
+    $path_info = pathinfo($name);
+
+    $file_entry = new stdClass();
+    $file_entry->parent_collection = $path_info['dirname'] . '/';
+    $file_entry->ajaxplorer_file_path = $name;
+    $file_entry->is_file = TRUE;
+    $file_entry->file_name = $path_info['basename'];
+
+    if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {
+      $file_entry->uri = "zip://$zip_file#$name";
+      $files_info[] = $file_entry;
     }
+    else {
+      $file_entry->parent_collection = $file_entry->parent_collection == "./" ? $root_collection : $file_entry->parent_collection;
+      $file_entry->content_model = "islandora:collectionCModel";
+      $collections_info[] = $file_entry;
+    }
+
   }
-  return $pids;
+
+  $files_info = array_merge($collections_info, $files_info);
+
+  $zip->close();
+
+  // Store the informatino into th context.
+  $context['results']['files'] = $files_info;
+  $context['results']['temp_zip'] = $zip_file;
+}
+
+/**
+ * Get the folder information.
+ *
+ * @param array $params
+ *   The ajaxplorer parameters.
+ * @param string $file_path
+ *   The download url of file.
+ */
+function sfudora_ajaxplorer_get_file_data($params, $file_path, &$context) {
+
+  $file = drupal_realpath($file_path);
+
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
+
+  $files_info = array();
+  $file_entry = new stdClass();
+  $file_entry->parent_collection = $root_collection;
+  $file_entry->ajaxplorer_file_path = $params['download_query_params']['file'];
+  $file_entry->is_file = TRUE;
+  $file_entry->uri = $file;
+  $files_info[] = $file_entry;
+
+  $context['results']['files'] = $files_info;
+  $context['results']['temp_zip'] = $file;
 }
 
 /**
  * Add relationship between ajaxplorer file and islandora object.
  *
- * @param string $parsed_url
- *   The url in ajaxplorer.
+ * @param string $file_path
+ *   The path of the file in ajaxplorer.
+ * @param string $repo_id
+ *   The repository Id of the file on ajaxplorer.
  * @param FedoraObject $object
  *   The object that should add relationship
  */
-function sfudora_ajaxplorer_add_file_object_relationship($parsed_url, $object) {
+function sfudora_ajaxplorer_add_file_object_relationship($file_path, $repo_id, $object) {
+
   $object->relationships->registerNamespace("ajxp", SFUDORA_AJXP_URI);
-  if (isset($parsed_url['file'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "file", $parsed_url['file'], TRUE);
+  $object->relationships->add(SFUDORA_AJXP_URI, "file", $file_path, TRUE);
+  $object->relationships->add(SFUDORA_AJXP_URI, "repository", $repo_id, TRUE);
+}
+
+/**
+ * Check to see if the objects exists in fedora.
+ *
+ * @param string $file_path
+ *   The path of the file in ajaxplorer.
+ * @param string $repo_id
+ *   The repository Id of the file on ajaxplorer.
+ *
+ * @return array
+ *   Returns the result form the query.
+ */
+function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
+  $repo = islandora_get_tuque_connection();
+
+  $query = "
+    SELECT ?pid
+    FROM <#ri>
+    WHERE
+    {
+      ?pid <http://ajaxplorer.infofile> \"$file_path\" ;
+      <http://ajaxplorer.inforepository> \"$repo_id\".
+    }";
+
+  $result = array_pop($repo->repository->ri->sparqlQuery($query));
+  return $result['pid']['value'];
+}
+
+/**
+ * Function to return the content model based on mimetype.
+ *
+ * @param string $file
+ *   The file.
+ *
+ * @return string
+ *   Returns the content model to be used.
+ */
+function sfudora_ajaxplorer_get_content_model($file) {
+  module_load_include('inc', 'islandora', 'includes/mime_detect');
+
+  // Get the mimetype of the file.
+  $mime_detect = new MimeDetect();
+  $mimetype = $mime_detect->getMimetype($file);
+
+  // Get all of the enabled solution packs.
+  $connection = islandora_get_tuque_connection();
+  $enabled_solution_packs = module_invoke_all('islandora_required_objects', $connection);
+
+  // Set generic default content model.
+  $content_model = "sfu:genericCModel";
+
+  switch ($mimetype) {
+    // Basic Image.
+    case "image/jpg":
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+      if (isset($enabled_solution_packs['islandora_basic_image'])) {
+        $content_model = "islandora:sp_basic_image";
+      }
+      break;
+
+    // Large Image.
+    case "image/tiff":
+      if (isset($enabled_solution_packs['islandora_large_image'])) {
+        $content_model = "islandora:sp_large_image_cmodel";
+      }
+      break;
+
+    // PDF.
+    case "application/pdf":
+      if (isset($enabled_solution_packs['islandora_pdf'])) {
+        $content_model = "islandora:sp_pdf";
+      }
+      break;
+
+    // Video.
+    case "video/mp4":
+    case "video/quicktime":
+    case "video/m4v":
+    case "video/x-matroska":
+    case "video/x-msvideo";
+    case "video/ogg":
+      if (isset($enabled_solution_packs['islandora_video'])) {
+        $content_model = "islandora:sp_videoCModel";
+      }
+      break;
+
+    // Audio.
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/x-wav":
+    case "audio/vnd.wave":
+    case "audio/flac":
+      if (isset($enabled_solution_packs['islandora_audio'])) {
+        $content_model = "islandora:sp-audioCModel";
+      }
+      break;
   }
 
-  if (isset($parsed_url['repository'])) {
-    $object->relationships->add(SFUDORA_AJXP_URI, "repository", $parsed_url['repository'], TRUE);
-  }
+  return $content_model;
 }

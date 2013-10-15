@@ -7,7 +7,7 @@
 
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
 define('SFUDORA_XACML_FOLDER', '/xacml');
-define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info#');
+define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
 
 /**
  * Implements hook_menu().
@@ -22,9 +22,17 @@ function sfudora_menu() {
     'file' => 'includes/ajaxplorer_ingest.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['admin/islandora/sfudora'] = array(
+    'title' => 'Simon Fraser University Settings',
+    'description' => 'Configure settings for the sfudora module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sfudora_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/sfudora.admin.form.inc',
+  );
+
   return $items;
 }
-
 
 /**
  * Implements hook_islandora_required_objects().
