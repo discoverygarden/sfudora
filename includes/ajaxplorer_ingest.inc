@@ -26,7 +26,17 @@ function sfudora_ajaxplorer_ingest() {
   $qp = array();
   parse_str($params['download_query_params'], $qp);
   $params['download_query_params'] = $qp;
-  return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
+
+  $pids = sfudora_ajaxplorer_object_check($params['download_query_params']['file']);
+  if ($pids){
+    $params['pid_list'] = $pids;
+    return drupal_get_form('sfudora_ajaxplorer_update_form', $params);
+  }
+  else {
+    return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
+    
+  }  
+
 }
 
 /**
@@ -236,6 +246,44 @@ function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operatio
     $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
     drupal_goto('/sfudora/ajaxplorer');
   }
+}
+
+
+/**
+ * Form building function.
+ */
+function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
+  form_load_include($form_state, 'inc', 'sfudora', 'includes/ajaxplorer_ingest');
+
+  $download_url = url($params['download_base_url'], array(
+    'query' => $params['download_query_params'],
+    'absolute' => TRUE,
+  ));
+
+  $form_state['storage']['download_url'] = $download_url;
+  $form_state['storage']['ajaxplorer_params'] = $params;
+
+  $header = array(
+    'pid' => t('Pid'),
+    'title' => t('Title'),
+    'link' => t('Link'),
+  );
+ 
+  foreach ($params['pid_list'] as $object) {
+    $rows[] = array(
+      $object['pid']['value'],
+      $object['label']['value'],
+      l('islandora/object/'.  $object['pid']['value'], TRUE),
+    );
+  }
+  $form['pid_table'] = array(
+    '#header' => $header,
+    '#type' => 'tableselect',
+    '#options' => $rows,
+    '#empty' => t('No results found.'),
+  );
+
+  return $form;
 }
 
 /**
@@ -483,8 +531,8 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
     $path_info = pathinfo($name);
 
     $file_entry = new stdClass();
-    $file_entry->parent_collection = $path_info['dirname'] . '/';
-    $file_entry->ajaxplorer_file_path = $name;
+    $file_entry->parent_collection = '/' . $path_info['dirname'] . '/';
+    $file_entry->ajaxplorer_file_path = '/' . $name;
     $file_entry->is_file = TRUE;
     $file_entry->file_name = $path_info['basename'];
 
@@ -493,7 +541,7 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
       $files_info[] = $file_entry;
     }
     else {
-      $file_entry->parent_collection = $file_entry->parent_collection == "./" ? $root_collection : $file_entry->parent_collection;
+      $file_entry->parent_collection = $file_entry->parent_collection == "/./" ? $root_collection : $file_entry->parent_collection;
       $file_entry->content_model = "islandora:collectionCModel";
       $collections_info[] = $file_entry;
     }
@@ -569,16 +617,17 @@ function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
   $repo = islandora_get_tuque_connection();
 
   $query = "
-    SELECT ?pid
+    SELECT ?pid ?label
     FROM <#ri>
     WHERE
     {
       ?pid <http://ajaxplorer.infofile> \"$file_path\" ;
-      <http://ajaxplorer.inforepository> \"$repo_id\".
+      <http://ajaxplorer.inforepository> \"$repo_id\" ;
+      <fedora-model:label> ?label
     }";
 
-  $result = array_pop($repo->repository->ri->sparqlQuery($query));
-  return $result['pid']['value'];
+  $result = $repo->repository->ri->sparqlQuery($query);
+  return $result;
 }
 
 /**
