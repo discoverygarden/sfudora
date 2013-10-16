@@ -64,7 +64,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   $form_state['storage']['download_url'] = $download_url;
   $form_state['storage']['ajaxplorer_params'] = $params;
 
-  $form_name = "Basic image MODS form";
+  $form_name = "SFU DDI form";
   $form = xml_form_builder_get_form($form, $form_state, $form_name);
 
   $form['restrict_options'] = array(

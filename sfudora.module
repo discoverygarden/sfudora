@@ -77,3 +77,15 @@ function sfudora_ajaxplorer_access_callback() {
   $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:root'));
   return in_array('authenticated user', $user->roles) && islandora_object_access(ISLANDORA_INGEST, $object, $user);
 }
+
+/**
+ * Implements hook_islandora_xml_form_builder_forms().
+ */
+function sfudora_islandora_xml_form_builder_forms() {
+  $module_path = drupal_get_path('module', 'sfudora');
+  return array(
+    'SFU DDI form' => array(
+      'form_file' => "$module_path/xml/ddi_2.5_form.xml",
+    ),
+  );
+}
