@@ -18,15 +18,16 @@ function sfudora_menu() {
 
   $items[SFUDORA_INGEST_PATH] = array(
     'title' => 'Ingest',
-    'access callback' => TRUE,
+    'access callback' => 'sfudora_ajaxplorer_access_callback',
     'page callback' => 'sfudora_ajaxplorer_ingest',
     'file' => 'includes/ajaxplorer_ingest.inc',
     'type' => MENU_CALLBACK,
   );
   $items[SFUDORA_AJXP_FRAME] = array(
     'title' => 'AjaXplorer',
-    'access callback' => TRUE,
+    'access callback' => 'sfudora_ajaxplorer_access_callback',
     'page callback' => 'sfudora_ajaxplorer_frame',
+    'file' => 'includes/iframe.inc',
     'type' => MENU_NORMAL_ITEM,
   );
   $items['admin/islandora/sfudora'] = array(
@@ -35,7 +36,7 @@ function sfudora_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sfudora_admin_form'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'includes/sfudora.admin.form.inc',
+    'file' => 'includes/admin.form.inc',
   );
 
   return $items;
@@ -68,17 +69,11 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
 }
 
 /**
- * Page callback; render iframe containing AjaXplorer.
+ * Menu access callback.
  */
-function sfudora_ajaxplorer_frame() {
-  $output = array();
-  $module_path = drupal_get_path('module', 'sfudora');
-  drupal_add_js("$module_path/js/ajaxplorer_frame.js");
-  drupal_add_css("$module_path/css/ajaxplorer_frame.css");
-  $server_base_url = $_SERVER['HTTP_HOST'];
-  $sfu_path = "http://" . $server_base_url . "/" . variable_get('ajxp_path', 'ajaxplorer');
-  $output['Simon Fraser University AjaXplorer'] = array(
-    '#markup' => "<iframe id=\"ajaxplorer_frame\" src=\"$sfu_path\"></iframe>",
-  );
-  return $output;
+function sfudora_ajaxplorer_access_callback() {
+  global $user;
+
+  $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:root'));
+  return in_array('authenticated user', $user->roles) && islandora_object_access(ISLANDORA_INGEST, $object, $user);
 }

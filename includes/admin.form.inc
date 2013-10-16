@@ -17,6 +17,7 @@
  *   An array representing the Simon Fraser University admin form.
  */
 function sfudora_admin_form($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'sfudora', 'includes/admin.form');
 
   $form = array();
 
