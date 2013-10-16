@@ -23,16 +23,17 @@ function sfudora_ajaxplorer_ingest() {
   $params = drupal_get_query_parameters();
 
   // Parse download_query_params into an associative array.
-  $qp = array();
-  parse_str($params['download_query_params'], $qp);
-  $params['download_query_params'] = $qp;
-  
+  if (!is_array($params['download_query_params'])) {
+    $qp = array();
+    parse_str($params['download_query_params'], $qp);
+    $params['download_query_params'] = $qp;
+  }
   if ($params['is_dir'] == 'true') {
     drupal_set_message(t("Folders can not be updated"), "error");
   }
   
   $pids = sfudora_ajaxplorer_object_check($params['download_query_params']['file'], $params['repo_id']);
-  if ($pids) {
+  if ($pids && !isset($params['pid_list'])) {
     $params['pid_list'] = $pids;
     return drupal_get_form('sfudora_ajaxplorer_update_form', $params);
   }
@@ -225,6 +226,8 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
 function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
   form_load_include($form_state, 'inc', 'sfudora', 'includes/ajaxplorer_ingest');
 
+  drupal_set_title("SFU Update");
+  
   $download_url = url($params['download_base_url'], array(
     'query' => $params['download_query_params'],
     'absolute' => TRUE,
@@ -287,7 +290,8 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
   }
   
   if (!$update_list) {
-    drupal_goto($form_state['storage']['ajaxplorer_params']);
+    $url = url("sfudora/ingest/", array('absolute' => TRUE, 'query' => $form_state['storage']['ajaxplorer_params']));
+    drupal_goto($url);
   }
   // Get the ajaxplorer params.
   $params = $form_state['storage']['ajaxplorer_params'];
