@@ -248,8 +248,6 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
     '#empty' => t('No results found.'),
   );
   
-  $form_name = "Basic image MODS form";
-  $form = xml_form_builder_get_form($form, $form_state, $form_name);
   // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
@@ -277,6 +275,15 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
     if ($value !== 0) {
       $update_list[] = ($form['current_object']['pid_table']['#options'][$checkbox]);
     }
+  }
+  // Get the ajaxplorer params.
+  $params = $form_state['storage']['ajaxplorer_params'];
+  $download_url = "";
+  if (isset($form_state['storage']['download_url'])) {
+    $download_url = $form_state['storage']['download_url'];
+  }
+  else {
+    drupal_set_message(t("Download Url not exist"), "Error");
   }
   
    // Set up a batch operation.
@@ -361,7 +368,7 @@ function sfudora_ajaxplorer_update_object_batch($form, $form_state, $update_list
   $form_state['storage']['ajaxplorer_params']['is_dir'] = "false";
   $offset = $sandbox['offset'];
 
-  sfudora_ajaxplorer_ingest_single_object($form, $form_state, $files[$offset], $update_list[$offset]);
+  sfudora_ajaxplorer_update_obj_datastream($form, $form_state, $files[$offset], $update_list[$offset]);
   $sandbox['offset']++;
 
   if ($sandbox['offset'] >= $sandbox['total']) {
@@ -532,23 +539,12 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
  * @return string
  *   Returns the temporary file path of the downloaded file.
  */
-function sfudora_ajaxplorer_update_obj_datastream(&$form, &$form_state,$file, $update_object) {
+function sfudora_ajaxplorer_update_obj_datastream(&$form, &$form_state,$file_info, $update_object) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
 
     $pid = $update_object['pid']['value'];
     $object = islandora_object_load($pid);
-    islandora_delete_datastream($object['OBJ']);
-
-    $file_path = $form_state['storage']['ajaxplorer_params']['download_query_params']['file'];
-    $mime_detect = new MimeDetect();
-    $obj_mimetype = $mime_detect->getMimetype($file_path);
-
-    // Create the OBJ datastream.
-    $obj_ds = $object->constructDatastream('OBJ', 'M');
-    $obj_ds->label = $file_path;
-    $obj_ds->mimeType = $obj_mimetype;
-    $obj_ds->setContentFromFile($form_state['storage']['download_url'], FALSE);
-    $new_object->ingestDatastream($obj_ds);
+    $object['OBJ']->setContentFromFile($file_info->uri, FALSE);
 }
 
 /**
