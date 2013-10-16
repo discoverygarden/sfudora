@@ -17,6 +17,7 @@
  *   An array representing the Simon Fraser University admin form.
  */
 function sfudora_admin_form($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'sfudora', 'includes/admin.form');
 
   $form = array();
 
@@ -27,7 +28,7 @@ function sfudora_admin_form($form, &$form_state) {
     '#description' => t('The PID of the Root Collection Object'),
     '#required' => TRUE,
   );
-  
+
   $form['ajxp_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Ajaxplorer path'),
@@ -52,7 +53,9 @@ function sfudora_admin_form_validate(&$form, &$form_state) {
 
   $object = islandora_object_load($form_state['values']['root_collection']);
   if (!$object) {
-    form_set_error('root_collection', t($form_state['values']['root_collection'] . ' does not exist. Enter a valid PID.'));
+    form_set_error('root_collection', t('%pid does not exist. Enter a valid PID.', array(
+      '%pid' => $form_state['values']['root_collection'],
+    )));
   }
 }
 
