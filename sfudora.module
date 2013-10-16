@@ -7,7 +7,7 @@
 
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
 define('SFUDORA_XACML_FOLDER', '/xacml');
-define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
+define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info#');
 define('SFUDORA_AJXP_FRAME', 'sfudora/ajaxplorer');
 
 /**
@@ -76,4 +76,72 @@ function sfudora_ajaxplorer_access_callback() {
 
   $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:root'));
   return in_array('authenticated user', $user->roles) && islandora_object_access(ISLANDORA_INGEST, $object, $user);
+}
+
+/**
+ * Implements hook_islandora_xml_form_builder_forms().
+ */
+function sfudora_islandora_xml_form_builder_forms() {
+  $module_path = drupal_get_path('module', 'sfudora');
+  return array(
+    'SFU DDI form' => array(
+      'form_file' => "$module_path/xml/ddi_2.5_form.xml",
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_content_model_forms_form_associations().
+ */
+function sfudora_islandora_content_model_forms_form_associations() {
+  return array(
+    'sfudora_generic_form' => array(
+      'content_model' => 'sfu:genericCModel',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
+      'template' => FALSE,
+    ),
+    'sfudora_basic_image_form' => array(
+      'content_model' => 'islandora:sp_basic_image',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
+      'template' => FALSE,
+    ),
+    'sfudora_large_image_form' => array(
+      'content_model' => 'islandora:sp_large_image_cmodel',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
+      'template' => FALSE,
+    ),
+    'sfudora_pdf_form' => array(
+      'content_model' => 'islandora:sp_pdf',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
+      'template' => FALSE,
+    ),
+    'sfudora_video_form' => array(
+      'content_model' => 'islandora:sp_videoCModel',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
+      'template' => FALSE,
+    ),
+    'sfudora_audio_form' => array(
+      'content_model' => 'islandora:sp-audioCModel',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
+      'template' => FALSE,
+    ),
+  );
 }
