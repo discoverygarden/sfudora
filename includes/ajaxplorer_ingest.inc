@@ -30,12 +30,18 @@ function sfudora_ajaxplorer_ingest() {
   }
   // Check to see if a folder is tring to update.
   if ($params['is_dir'] == 'true') {
-    drupal_set_message(t("Folders cannot be updated"), "error");
+    $file_path = $params['download_query_params']['file'] . '/';
+  }
+  else {
+    $file_path = $params['download_query_params']['file'];
   }
 
-  $pids = sfudora_ajaxplorer_object_check($params['download_query_params']['file'], $params['repo_id']);
-  if ($pids && !isset($params['pid_list'])) {
-
+  $pids = sfudora_ajaxplorer_object_check($file_path, $params['repo_id']);
+  if ($pids && empty($params['pid_list'])) {
+    if ($params['is_dir'] == 'true') {
+      drupal_set_message(t("Folders cannot be updated"), "error");
+      return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
+    }
     $params['pid_list'] = $pids;
     return drupal_get_form('sfudora_ajaxplorer_update_form', $params);
   }
