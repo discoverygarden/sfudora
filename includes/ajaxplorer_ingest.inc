@@ -39,7 +39,7 @@ function sfudora_ajaxplorer_ingest() {
   $pids = sfudora_ajaxplorer_object_check($file_path, $params['repo_id']);
   if ($pids && empty($params['pid_list'])) {
     if ($params['is_dir'] == 'true') {
-      drupal_set_message(t("Folders cannot be updated"), "error");
+      drupal_set_message(t("Folders cannot be updated.  This will create a new collection."), "error");
       return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
     }
     $params['pid_list'] = $pids;
