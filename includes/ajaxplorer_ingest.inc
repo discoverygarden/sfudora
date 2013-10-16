@@ -768,19 +768,17 @@ function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
 
   $repo = islandora_get_tuque_connection();
 
-  $variables = array('@SFUDORA_AJXP_URI' =>SFUDORA_AJXP_URI, '@file' => 'file', '@repository'=>'repository');
-
-  $query = format_string("
-    PREFIX sfudora_file: <@SFUDORA_AJXP_URI@file>
-    PREFIX sfudora_repository: <@SFUDORA_AJXP_URI@repository>
+  $ajxp_namespace = SFUDORA_AJXP_URI;
+  $query =
+    "PREFIX sfudora:<$ajxp_namespace>
     SELECT ?pid ?label
     FROM <#ri>
     WHERE
     {
-      ?pid sfudora_file:\"$file_path\" ;
-     sfudora_repository:\"$repo_id\";
-     <fedora-model:label> ?label
-    }", $variables);
+      ?pid sfudora:file \"$file_path\" ;
+      sfudora:repository \"$repo_id\" ;
+      <fedora-model:label> ?label
+    }";
   
   $result = $repo->repository->ri->sparqlQuery($query);
   return $result;
