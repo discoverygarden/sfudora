@@ -28,29 +28,20 @@ function sfudora_ajaxplorer_ingest() {
     parse_str($params['download_query_params'], $qp);
     $params['download_query_params'] = $qp;
   }
+  // Check to see if a folder is tring to update.
   if ($params['is_dir'] == 'true') {
-    drupal_set_message(t("Folders can not be updated"), "error");
+    drupal_set_message(t("Folders cannot be updated"), "error");
   }
-  
+
   $pids = sfudora_ajaxplorer_object_check($params['download_query_params']['file'], $params['repo_id']);
   if ($pids && !isset($params['pid_list'])) {
+
     $params['pid_list'] = $pids;
     return drupal_get_form('sfudora_ajaxplorer_update_form', $params);
   }
   else {
     return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
   }
-}
-
-function sfudora_ajaxplorer_update_ingest($params) {
-
-  // Parse download_query_params into an associative array.
-  $qp = array();
-  parse_str($params['download_query_params'], $qp);
-  $params['download_query_params'] = $qp;
-  
-  return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
-  
 }
 
 /**
@@ -227,7 +218,7 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
   form_load_include($form_state, 'inc', 'sfudora', 'includes/ajaxplorer_ingest');
 
   drupal_set_title("SFU Update");
-  
+
   $download_url = url($params['download_base_url'], array(
     'query' => $params['download_query_params'],
     'absolute' => TRUE,
@@ -288,7 +279,8 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
       $update_list[] = ($form['current_object']['pid_table']['#options'][$checkbox]);
     }
   }
-  
+
+  // If the list is empty then go to ingest form.
   if (!$update_list) {
     $url = url("sfudora/ingest/", array('absolute' => TRUE, 'query' => $form_state['storage']['ajaxplorer_params']));
     drupal_goto($url);
@@ -312,7 +304,7 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
         array($form, $form_state, $update_list)),
     ),
     'title' => t('SFU Update'),
-    'init_message' => t('Ingest from Ajaxplorer'),
+    'init_message' => t('Update from Ajaxplorer'),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
@@ -674,12 +666,12 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
     $file_entry = new stdClass();
     $file_entry->parent_collection = '/' . $path_info['dirname'] . '/';
     $file_entry->ajaxplorer_file_path = '/' . $name;
-    $file_entry->is_file = TRUE;
     $file_entry->file_name = $path_info['basename'];
 
     if (isset($path_info['extension']) && strpos($path_info['dirname'], '__MACOSX') === FALSE && $path_info['extension'] != 'DS_Store') {
       $file_entry->uri = "zip://$zip_file#$name";
       $files_info[] = $file_entry;
+      $file_entry->is_file = TRUE;
     }
     else {
       $file_entry->parent_collection = $file_entry->parent_collection == "/./" ? $root_collection : $file_entry->parent_collection;
