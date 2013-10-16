@@ -277,9 +277,9 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_inf
     // Create the DDI datastream.
     sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
   }
-  $is_dir = ($content_model == 'islandora:collectionCModel') ? TRUE : FALSE;
-  if ($is_dir) {
-    sfudora_ajaxplorer_ingest_create_policy_datastream($form, $form_state, $new_object, $parent_collection);
+
+  if ($content_model == 'islandora:collectionCModel') {
+    sfudora_ajaxplorer_ingest_create_policy_datastream($new_object, $parent_collection);
   }
   // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
@@ -351,25 +351,20 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
 /**
  * Creates a COLLECTION_POLICY Datastream.
  *
- * @param array $form
- *   The form.
- * @param string $form_state
- *   The form state.
  * @param object $new_object
  *   The new Object.
  * @param string $parent_collection 
  *   The parent collection
  */
-function sfudora_ajaxplorer_ingest_create_policy_datastream(&$form, &$form_state, $new_object, $parent_collection) {
-  $parent = $parent_collection;
-  $collection = islandora_object_load($parent);
+function sfudora_ajaxplorer_ingest_create_policy_datastream($new_object, $parent_collection) {
+  $collection = islandora_object_load($parent_collection);
   $policy_xml = $collection['COLLECTION_POLICY']->content;
   $policy = new CollectionPolicy($policy_xml);
   // Create the OBJ datastream.
   $obj_ds = $new_object->constructDatastream('COLLECTION_POLICY', 'M');
   $obj_ds->label = 'COLLECTION_POLICY';
   $obj_ds->mimeType = 'text/xml';
-  $obj_ds->setContentFromString($policy->getXML(), FALSE);
+  $obj_ds->setContentFromString($policy->getXML());
   $new_object->ingestDatastream($obj_ds);
 }
 
