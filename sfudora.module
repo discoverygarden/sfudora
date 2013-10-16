@@ -8,7 +8,8 @@
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
 define('SFUDORA_XACML_FOLDER', '/xacml');
 define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
-define('SFUDORA_AJXP_FRAME','sfudora/ajaxplorer');
+define('SFUDORA_AJXP_FRAME', 'sfudora/ajaxplorer');
+
 /**
  * Implements hook_menu().
  */
@@ -16,17 +17,18 @@ function sfudora_menu() {
   $items = array();
 
   $items[SFUDORA_INGEST_PATH] = array(
-    'title' => 'SFU Ingest',
-    'access callback' => TRUE,
+    'title' => 'Ingest',
+    'access callback' => 'sfudora_ajaxplorer_access_callback',
     'page callback' => 'sfudora_ajaxplorer_ingest',
     'file' => 'includes/ajaxplorer_ingest.inc',
     'type' => MENU_CALLBACK,
   );
-  $items[SFUDORA_AJXP_FRAME] = array (
-    'title'=> 'SFU Ajaxplorer Frame',
-    'access callback' => TRUE,
+  $items[SFUDORA_AJXP_FRAME] = array(
+    'title' => 'AjaXplorer',
+    'access callback' => 'sfudora_ajaxplorer_access_callback',
     'page callback' => 'sfudora_ajaxplorer_frame',
-    'type' => MENU_CALLBACK,
+    'file' => 'includes/iframe.inc',
+    'type' => MENU_NORMAL_ITEM,
   );
   $items['admin/islandora/sfudora'] = array(
     'title' => 'Simon Fraser University Settings',
@@ -34,7 +36,7 @@ function sfudora_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sfudora_admin_form'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'includes/sfudora.admin.form.inc',
+    'file' => 'includes/admin.form.inc',
   );
 
   return $items;
@@ -66,17 +68,12 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
   );
 }
 
-function sfudora_ajaxplorer_frame()
-{
-  drupal_set_title("AjaXplorer");
-  $output = array();
-  $module_path = drupal_get_path('module','sfudora');
-  drupal_add_js("$module_path/js/ajaxplorer_frame.js");
-  drupal_add_css("$module_path/css/ajaxplorer_frame.css");
-  $serverBaseURL=$_SERVER['HTTP_HOST'];
-  $sfu_path = "http://".$serverBaseURL."/".variable_get('ajxp_path', 'ajaxplorer');
-  $output['Simon Fraser University AjaXplorer'] = array (
-     '#markup' =>"<iframe id=\"ajaxplorer_frame\" src=\"$sfu_path\"></iframe>", 
-  ) ;
-  return $output;
+/**
+ * Menu access callback.
+ */
+function sfudora_ajaxplorer_access_callback() {
+  global $user;
+
+  $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:root'));
+  return in_array('authenticated user', $user->roles) && islandora_object_access(ISLANDORA_INGEST, $object, $user);
 }

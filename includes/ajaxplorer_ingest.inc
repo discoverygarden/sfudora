@@ -156,7 +156,6 @@ function sfudora_ajaxplorer_folder_ingest_form(&$form, &$form_state, $params) {
   $form['titleInfo']['title']['#value'] = $name;
 }
 
-
 /**
  * Form validation function.
  */
@@ -179,7 +178,6 @@ function sfudora_ajaxplorer_ingest_form_validate(&$form, &$form_state) {
       }
       $form['embargo'] = $newembargo;
     }
-
   }
 }
 
@@ -202,7 +200,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
   $batch = array(
     'operations' => array(
       array('sfudora_ajaxplorer_download_file_data', array(
-        $params, $download_url)),
+          $params, $download_url)),
       array('sfudora_ajaxplorer_ingest_object_batch',
         array($form, $form_state)),
     ),
@@ -445,6 +443,9 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_inf
     sfudora_ajaxplorer_ingest_create_ddi_datastream($form, $form_state, $new_object);
   }
 
+  if ($content_model == 'islandora:collectionCModel') {
+    sfudora_ajaxplorer_ingest_create_policy_datastream($new_object, $parent_collection);
+  }
   // Add embargo to this object.
   if (isset($form_state['values']['restrict_options']) &&
       $form_state['values']['restrict_options'] == 'embargo') {
@@ -510,6 +511,26 @@ function sfudora_ajaxplorer_ingest_create_ddi_datastream(&$form, &$form_state, $
   $ddi_ds->mimeType = 'text/xml';
   $ddi_ds->setContentFromString($ddi_doc->document->saveXML());
   $new_object->ingestDatastream($ddi_ds);
+}
+
+/**
+ * Creates a COLLECTION_POLICY Datastream.
+ *
+ * @param object $new_object
+ *   The new Object.
+ * @param string $parent_collection 
+ *   The parent collection
+ */
+function sfudora_ajaxplorer_ingest_create_policy_datastream($new_object, $parent_collection) {
+  $collection = islandora_object_load($parent_collection);
+  $policy_xml = $collection['COLLECTION_POLICY']->content;
+  $policy = new CollectionPolicy($policy_xml);
+  // Create the OBJ datastream.
+  $obj_ds = $new_object->constructDatastream('COLLECTION_POLICY', 'M');
+  $obj_ds->label = 'COLLECTION_POLICY';
+  $obj_ds->mimeType = 'text/xml';
+  $obj_ds->setContentFromString($policy->getXML());
+  $new_object->ingestDatastream($obj_ds);
 }
 
 /**
@@ -684,7 +705,6 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
       $file_entry->content_model = "islandora:collectionCModel";
       $collections_info[] = $file_entry;
     }
-
   }
 
   $files_info = array_merge($collections_info, $files_info);
