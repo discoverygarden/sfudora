@@ -132,7 +132,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
   // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Ingest'),
   );
 
   if ($params['is_dir'] == 'true') {
@@ -258,7 +258,7 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
   // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Update'),
   );
 
   return $form;
@@ -426,7 +426,7 @@ function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_inf
 
   // Depending if the the batch is a single file or folder, the title will be
   // either the form title or the file name.
-  $title = isset($file_info->file_name) ? $file_info->file_name : $form_state['values']['titleInfo']['title'];
+  $title = isset($file_info->file_name) ? $file_info->file_name : $form_state['values']['stdyDscr']['citation']['titlStmt']['titl'];
 
   // Set the file name to be the file info file name or the ajaxplorer
   // file path.
