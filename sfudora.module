@@ -6,6 +6,7 @@
  */
 
 define('SFUDORA_INGEST_PATH', 'sfudora/ingest');
+define('SFUDORA_INGEST_UPDATE_PATH', 'sfudora/update/ingest/%');
 define('SFUDORA_XACML_FOLDER', '/xacml');
 define('SFUDORA_AJXP_URI', 'http://ajaxplorer.info');
 define('SFUDORA_AJXP_FRAME','sfudora/ajaxplorer');
@@ -19,6 +20,14 @@ function sfudora_menu() {
     'title' => 'SFU Ingest',
     'access callback' => TRUE,
     'page callback' => 'sfudora_ajaxplorer_ingest',
+    'file' => 'includes/ajaxplorer_ingest.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items[SFUDORA_INGEST_UPDATE_PATH] = array(
+    'title' => 'SFU Ingest',
+    'access callback' => TRUE,
+    'page callback' => 'sfudora_ajaxplorer_update_ingest',
+    'page arguments' => array(3),
     'file' => 'includes/ajaxplorer_ingest.inc',
     'type' => MENU_CALLBACK,
   );

@@ -28,7 +28,7 @@ function sfudora_ajaxplorer_ingest() {
   $params['download_query_params'] = $qp;
   
   if ($params['is_dir'] == 'true') {
-    drupal_set_message(t("Folders can not be updated"), "Error");
+    drupal_set_message(t("Folders can not be updated"), "error");
   }
   
   $pids = sfudora_ajaxplorer_object_check($params['download_query_params']['file'], $params['repo_id']);
@@ -39,6 +39,17 @@ function sfudora_ajaxplorer_ingest() {
   else {
     return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
   }
+}
+
+function sfudora_ajaxplorer_update_ingest($params) {
+
+  // Parse download_query_params into an associative array.
+  $qp = array();
+  parse_str($params['download_query_params'], $qp);
+  $params['download_query_params'] = $qp;
+  
+  return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
+  
 }
 
 /**
@@ -186,7 +197,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     $download_url = $form_state['storage']['download_url'];
   }
   else {
-    drupal_set_message(t("Download Url not exist"), "Error");
+    drupal_set_message(t("Download Url not exist"), "error");
   }
 
   // Set up a batch operation.
@@ -274,6 +285,10 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
       $update_list[] = ($form['current_object']['pid_table']['#options'][$checkbox]);
     }
   }
+  
+  if (!$update_list) {
+    drupal_goto($form_state['storage']['ajaxplorer_params']);
+  }
   // Get the ajaxplorer params.
   $params = $form_state['storage']['ajaxplorer_params'];
   $download_url = "";
@@ -281,7 +296,7 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
     $download_url = $form_state['storage']['download_url'];
   }
   else {
-    drupal_set_message(t("Download Url not exist"), "Error");
+    drupal_set_message(t("Download Url not exist"), "error");
   }
 
   // Set up a batch operation.
