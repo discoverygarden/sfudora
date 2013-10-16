@@ -100,6 +100,7 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
       'template' => FALSE,
     ),
     'sfudora_basic_image_form' => array(
@@ -107,6 +108,7 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
       'template' => FALSE,
     ),
     'sfudora_large_image_form' => array(
@@ -114,6 +116,7 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
       'template' => FALSE,
     ),
     'sfudora_pdf_form' => array(
@@ -121,6 +124,7 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
       'template' => FALSE,
     ),
     'sfudora_video_form' => array(
@@ -128,13 +132,15 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
       'template' => FALSE,
     ),
-     'sfudora_audio_form' => array(
+    'sfudora_audio_form' => array(
       'content_model' => 'islandora:sp-audioCModel',
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr','citation','titlStmt','titl'),
+      'transform' => 'No Transform',
       'template' => FALSE,
     ),
   );

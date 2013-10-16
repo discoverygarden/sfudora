@@ -265,13 +265,6 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
 }
 
 /**
- * Form validation function.
- */
-function sfudora_ajaxplorer_update_form_validate(&$form, &$form_state) {
-  // TODO: Do the XML Form validation stuffs...
-}
-
-/**
  * Form submission function.
  */
 function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
@@ -775,18 +768,24 @@ function sfudora_ajaxplorer_object_check($file_path, $repo_id) {
 
   $repo = islandora_get_tuque_connection();
 
-  $query = "
+  $variables = array('@SFUDORA_AJXP_URI' =>SFUDORA_AJXP_URI, '@file' => 'file', '@repository'=>'repository');
+
+  $query = format_string("
+    PREFIX sfudora_file: <@SFUDORA_AJXP_URI@file>
+    PREFIX sfudora_repository: <@SFUDORA_AJXP_URI@repository>
     SELECT ?pid ?label
     FROM <#ri>
     WHERE
     {
-      ?pid <http://ajaxplorer.infofile> \"$file_path\" ;
-      <http://ajaxplorer.inforepository> \"$repo_id\" ;
-      <fedora-model:label> ?label
-    }";
-
+      ?pid sfudora_file:\"$file_path\" ;
+     sfudora_repository:\"$repo_id\";
+     <fedora-model:label> ?label
+    }", $variables);
+  
   $result = $repo->repository->ri->sparqlQuery($query);
   return $result;
+  
+  
 }
 
 /**
