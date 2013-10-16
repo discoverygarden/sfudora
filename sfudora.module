@@ -16,7 +16,7 @@ function sfudora_menu() {
   $items = array();
 
   $items[SFUDORA_INGEST_PATH] = array(
-    'title' => 'SFU ingest callback',
+    'title' => 'SFU Ingest',
     'access callback' => TRUE,
     'page callback' => 'sfudora_ajaxplorer_ingest',
     'file' => 'includes/ajaxplorer_ingest.inc',
