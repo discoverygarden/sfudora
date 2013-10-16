@@ -26,17 +26,19 @@ function sfudora_ajaxplorer_ingest() {
   $qp = array();
   parse_str($params['download_query_params'], $qp);
   $params['download_query_params'] = $qp;
-
+  
+  if ($params['is_dir'] == 'true') {
+    drupal_set_message(t("Folders can not be updated"), "Error");
+  }
+  
   $pids = sfudora_ajaxplorer_object_check($params['download_query_params']['file'], $params['repo_id']);
-  if ($pids){
+  if ($pids) {
     $params['pid_list'] = $pids;
     return drupal_get_form('sfudora_ajaxplorer_update_form', $params);
   }
   else {
     return drupal_get_form('sfudora_ajaxplorer_ingest_form', $params);
-    
-  }  
-
+  }
 }
 
 /**
@@ -203,12 +205,8 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
     'finished' => 'sfudora_ajaxplorer_ingest_object_finished',
   );
   batch_set($batch);
-  batch_process("/sfudora/ajaxplorer");
+  batch_process("sfudora/ajaxplorer");
 }
-
-
-
-
 
 /**
  * Form update.
@@ -228,11 +226,11 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
     'pid' => t('Pid'),
     'label' => t('Label'),
   );
- 
+
   foreach ($params['pid_list'] as $object) {
     $rows[] = array(
-      'pid'=>$object['pid']['value'],
-      'label'=> l($object['label']['value'], 'islandora/object/'.  $object['pid']['value']),
+      'pid' => $object['pid']['value'],
+      'label' => l($object['label']['value'], 'islandora/object/' . $object['pid']['value']),
     );
   }
   $form['current_object'] = array(
@@ -247,7 +245,7 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
     '#options' => $rows,
     '#empty' => t('No results found.'),
   );
-  
+
   // Set a specific callback for the submit button.
   $form['submit'] = array(
     '#type' => 'submit',
@@ -268,7 +266,7 @@ function sfudora_ajaxplorer_update_form_validate(&$form, &$form_state) {
  * Form submission function.
  */
 function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
-  
+
   $update_list = array();
 
   foreach ($form_state['values']['pid_table'] as $checkbox => $value) {
@@ -285,8 +283,8 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
   else {
     drupal_set_message(t("Download Url not exist"), "Error");
   }
-  
-   // Set up a batch operation.
+
+  // Set up a batch operation.
   $batch = array(
     'operations' => array(
       array('sfudora_ajaxplorer_download_file_data', array(
@@ -294,15 +292,15 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
       array('sfudora_ajaxplorer_update_object_batch',
         array($form, $form_state, $update_list)),
     ),
-    'title' => t('SFU Ingest'),
+    'title' => t('SFU Update'),
     'init_message' => t('Ingest from Ajaxplorer'),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
-    'finished' => 'sfudora_ajaxplorer_ingest_object_finished',
+    'finished' => 'sfudora_ajaxplorer_update_object_finished',
   );
   batch_set($batch);
-  batch_process("/sfudora/ajaxplorer");
+  batch_process("sfudora/ajaxplorer");
 }
 
 /**
@@ -343,7 +341,7 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
 function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operations) {
   if ($success) {
     $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
-    drupal_goto('/sfudora/ajaxplorer');
+    drupal_goto('sfudora/ajaxplorer');
   }
 }
 
@@ -356,7 +354,7 @@ function sfudora_ajaxplorer_update_object_batch($form, $form_state, $update_list
   $sandbox = &$context['sandbox'];
   if (!isset($sandbox['offset'])) {
     $sandbox['offset'] = 0;
-    $sandbox['total'] = count($files);
+    $sandbox['total'] = count($update_list);
     if ($sandbox['total'] === 0) {
       return;
     }
@@ -368,7 +366,7 @@ function sfudora_ajaxplorer_update_object_batch($form, $form_state, $update_list
   $form_state['storage']['ajaxplorer_params']['is_dir'] = "false";
   $offset = $sandbox['offset'];
 
-  sfudora_ajaxplorer_update_obj_datastream($form, $form_state, $files[$offset], $update_list[$offset]);
+  sfudora_ajaxplorer_update_obj_datastream($form, $form_state, $file, $update_list[$offset]);
   $sandbox['offset']++;
 
   if ($sandbox['offset'] >= $sandbox['total']) {
@@ -384,7 +382,7 @@ function sfudora_ajaxplorer_update_object_batch($form, $form_state, $update_list
 function sfudora_ajaxplorer_update_object_finished($success, $results, $operations) {
   if ($success) {
     $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
-    drupal_goto('/sfudora/ajaxplorer');
+    drupal_goto('sfudora/ajaxplorer');
   }
 }
 
@@ -527,24 +525,25 @@ function sfudora_ajaxplorer_ingest_create_obj_datastream(&$form, &$form_state, $
 }
 
 /**
- * Creates a OBJ Datastream.
+ * Updates a OBJ Datastream.
  *
  * @param array $form
  *   The form.
  * @param string $form_state
  *   The form state.
- * @param object $new_object
- *   The new Object.
+ * @param object $file_info
+ *   The file info.
+ * @param object $update_object
+ *   The pid of the object to update.
  *
  * @return string
  *   Returns the temporary file path of the downloaded file.
  */
-function sfudora_ajaxplorer_update_obj_datastream(&$form, &$form_state,$file_info, $update_object) {
-  module_load_include('inc', 'islandora', 'includes/mime_detect');
+function sfudora_ajaxplorer_update_obj_datastream(&$form, &$form_state, $file_info, $update_object) {
 
-    $pid = $update_object['pid']['value'];
-    $object = islandora_object_load($pid);
-    $object['OBJ']->setContentFromFile($file_info->uri, FALSE);
+  $pid = $update_object['pid'];
+  $object = islandora_object_load($pid);
+  $object['OBJ']->setContentFromFile($file_info->uri, FALSE);
 }
 
 /**
