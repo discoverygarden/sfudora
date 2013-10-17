@@ -85,7 +85,7 @@ function sfudora_islandora_xml_form_builder_forms() {
   $module_path = drupal_get_path('module', 'sfudora');
   return array(
     'SFU DDI form' => array(
-      'form_file' => "$module_path/xml/ddi_2.5_form.xml",
+      'form_file' => "$module_path/xml/DDI_final.xml",
     ),
   );
 }
