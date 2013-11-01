@@ -33,7 +33,7 @@ function sfudora_admin_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Ajaxplorer path'),
     '#default_value' => variable_get('ajxp_path', 'ajaxplorer/'),
-    '#description' => t('The ajxplorer path on this server'),
+    '#description' => t('The ajxplorer server url and path'),
     '#required' => TRUE,
   );
 
