@@ -33,7 +33,7 @@ function sfudora_admin_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Ajaxplorer path'),
     '#default_value' => variable_get('ajxp_path', 'ajaxplorer/'),
-    '#description' => t('The ajxplorer path on this server'),
+    '#description' => t('The ajxplorer server url and path'),
     '#required' => TRUE,
   );
 
@@ -64,6 +64,7 @@ function sfudora_admin_form_validate(&$form, &$form_state) {
  */
 function sfudora_admin_form_submit(&$form, &$form_state) {
 
+  variable_set('ajxp_path', $form_state['values']['ajxp_path']);
   variable_set('sfudora_repository_pid', $form_state['values']['root_collection']);
   drupal_set_message(t('Simon Fraser University settings saved.'), 'status');
 }
