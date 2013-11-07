@@ -152,4 +152,14 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'template' => FALSE,
     ),
   );
+ }
+ 
+ /**
+  * Implements hook_islandora_xml_form_builder_get_transforms().
+  */
+ function sfudora_islandora_xml_form_builder_get_transforms() {
+   $module_path = drupal_get_path('module', 'sfudora');
+   return array(
+     'ddi_to_dc.xsl' => "$module_path/xml/ddi_to_dc.xsl",
+  );
 }
