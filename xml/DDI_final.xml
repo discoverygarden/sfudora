@@ -1565,7 +1565,7 @@
                       </actions>
                     </properties>
                     <children>
-                      <element name="sources">
+                      <element name="dataSrc">
                         <properties>
                           <type>tags</type>
                           <access>TRUE</access>
@@ -1600,10 +1600,10 @@
                                   <schema/>
                                   <type>element</type>
                                   <prefix>NULL</prefix>
-                                  <value>sources</value>
+                                  <value>dataSrc</value>
                                 </create>
                                 <read>
-                                  <path>codeBook:sources</path>
+                                  <path>codeBook:dataSrc</path>
                                   <context>parent</context>
                                 </read>
                                 <update>
