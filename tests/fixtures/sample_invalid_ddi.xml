@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<codeBook xmlns="ddi:codebook:2_5" xmlns:codeBook="ddi:codebook:2_5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="ddi:codebook:2_5 http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd">
+  <fileDscr>
+    <fileTxt>
+      <fileType>ASCII</fileType>
+      <format>big</format>
+    </fileTxt>
+  </fileDscr>
+  <stdyDscr>
+    <method>
+      <dataColl>
+        <sources>
+          <dataSrc>Source #2</dataSrc>
+          <dataSrc>Source #1</dataSrc>
+        </sources>
+        <collMode>
+          <txt>one</txt>
+          <txt>two</txt>
+          <txt></txt>
+        </collMode>
+      </dataColl>
+    </method>
+    <citation>
+      <rspStmt>
+        <AuthEnty>Author # 2</AuthEnty>
+        <othId>Contributor # 2</othId>
+        <AuthEnty>Author #1</AuthEnty>
+        <othId>Contributor # 1</othId>
+      </rspStmt>
+      <distStmt>
+        <contact>Contact Details # 2</contact>
+        <contact>Contact Details # 1</contact>
+      </distStmt>
+      <prodStmt>
+        <fundAg>Funding Agency # 2</fundAg>
+        <prodDate>prod date # 2</prodDate>
+        <software>Software # 1</software>
+        <prodDate>prod date # 1</prodDate>
+        <copyright>Default to cc license selection</copyright>
+        <software>Software # 2</software>
+        <fundAg>Funding Agency # 1</fundAg>
+      </prodStmt>
+      <titlStmt>
+        <IDNo>id # 2</IDNo>
+        <IDNo>id # 1</IDNo>
+        <titl>Title</titl>
+      </titlStmt>
+      <biblCit>bib citation</biblCit>
+      <notes>add info # 2</notes>
+      <verStmt>
+        <version>1.0</version>
+      </verStmt>
+      <notes>add info # 1</notes>
+    </citation>
+    <dataAccs>
+      <useStmt>
+        <confDec>None required for research not involving human subjects</confDec>
+      </useStmt>
+    </dataAccs>
+    <stdyInfo>
+      <abstract>Abstract # 1</abstract>
+      <sumDscr>
+        <collDate>1999-10-21</collDate>
+        <dataKind>
+          <txt>image files</txt>
+          <txt>GIS data</txt>
+        </dataKind>
+        <collDate>1999-10-22</collDate>
+        <timePrd>time period # 2</timePrd>
+        <timePrd>time period # 1</timePrd>
+        <geogCover>
+          <txt>South America</txt>
+          <txt>North America</txt>
+        </geogCover>
+      </sumDscr>
+      <abstract>Abstract # 2</abstract>
+      <subject>
+        <topcClas>Topic # 2</topcClas>
+        <keyword>Subject # 2</keyword>
+        <topcClas>Topic # 1</topcClas>
+        <keyword>Subject # 1</keyword>
+      </subject>
+    </stdyInfo>
+  </stdyDscr>
+  <otherMat level="data">
+    <notes>materials #2</notes>
+    <notes>materials #1</notes>
+  </otherMat>
+</codeBook>
+

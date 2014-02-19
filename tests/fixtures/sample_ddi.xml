@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<codeBook xmlns="ddi:codebook:2_5" xmlns:codeBook="ddi:codebook:2_5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="ddi:codebook:2_5 http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd">
+  <stdyDscr>
+    <citation>
+      <titlStmt>
+        <titl>Title</titl>
+        <IDNo>id # 2</IDNo>
+        <IDNo>id # 1</IDNo>
+      </titlStmt>
+      <rspStmt>
+        <AuthEnty>Author # 2</AuthEnty>
+        <AuthEnty>Author #1</AuthEnty>
+        <othId>Contributor # 2</othId>
+        <othId>Contributor # 1</othId>
+      </rspStmt>
+      <prodStmt>
+        <copyright>Default to cc license selection</copyright>
+        <prodDate>prod date # 2</prodDate>
+        <prodDate>prod date # 1</prodDate>
+        <software>Software # 2</software>
+        <software>Software # 1</software>
+        <fundAg>Funding Agency # 2</fundAg>
+        <fundAg>Funding Agency # 1</fundAg>
+      </prodStmt>
+      <distStmt>
+        <contact>Contact Details # 2</contact>
+        <contact>Contact Details # 1</contact>
+      </distStmt>
+      <verStmt>
+        <version>1.0</version>
+      </verStmt>
+      <biblCit>bib citation</biblCit>
+      <notes>add info # 2</notes>
+      <notes>add info # 1</notes>
+    </citation>
+    <stdyInfo>
+      <subject>
+        <keyword>Subject # 2</keyword>
+        <keyword>Subject # 1</keyword>
+        <topcClas>Topic # 2</topcClas>
+        <topcClas>Topic # 1</topcClas>
+      </subject>
+      <abstract>Abstract # 1</abstract>
+      <abstract>Abstract # 2</abstract>
+      <sumDscr>
+        <timePrd>time period # 2</timePrd>
+        <timePrd>time period # 1</timePrd>
+        <collDate>1999-10-21</collDate>
+        <collDate>1999-10-22</collDate>
+        <geogCover>
+          <txt>South America</txt>
+          <txt>North America</txt>
+        </geogCover>
+        <dataKind>
+          <txt>image files</txt>
+          <txt>GIS data</txt>
+        </dataKind>
+      </sumDscr>
+    </stdyInfo>
+    <method>
+      <dataColl>
+        <collMode>
+          <txt>one</txt>
+          <txt>two</txt>
+          <txt></txt>
+        </collMode>
+        <sources>
+          <dataSrc>Source #2</dataSrc>
+          <dataSrc>Source #1</dataSrc>
+        </sources>
+      </dataColl>
+    </method>
+    <dataAccs>
+      <useStmt>
+        <confDec>None required for research not involving human subjects</confDec>
+      </useStmt>
+    </dataAccs>
+  </stdyDscr>
+  <fileDscr>
+    <fileTxt>
+      <fileType>ASCII</fileType>
+      <format>big</format>
+    </fileTxt>
+  </fileDscr>
+  <otherMat level="data">
+    <notes>materials #2</notes>
+    <notes>materials #1</notes>
+  </otherMat>
+</codeBook>
+
