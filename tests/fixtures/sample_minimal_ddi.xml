@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<codeBook xmlns="ddi:codebook:2_5" xmlns:codeBook="ddi:codebook:2_5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="ddi:codebook:2_5 http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd">
+  <stdyDscr>
+    <citation>
+      <titlStmt>
+        <titl>one</titl>
+        <IDNo/>
+      </titlStmt>
+      <rspStmt>
+        <AuthEnty>two</AuthEnty>
+        <othId/>
+      </rspStmt>
+      <prodStmt>
+        <copyright>Default to cc license selection</copyright>
+        <prodDate/>
+        <software/>
+        <fundAg>three</fundAg>
+      </prodStmt>
+      <distStmt>
+        <contact>four</contact>
+      </distStmt>
+      <verStmt>
+        <version/>
+      </verStmt>
+      <biblCit/>
+      <notes/>
+    </citation>
+    <stdyInfo>
+      <subject>
+        <keyword/>
+        <topcClas/>
+      </subject>
+      <abstract/>
+      <sumDscr>
+        <timePrd/>
+        <collDate/>
+        <geogCover>
+          <txt/>
+        </geogCover>
+        <dataKind>
+          <txt/>
+        </dataKind>
+      </sumDscr>
+    </stdyInfo>
+    <method>
+      <dataColl>
+        <collMode>
+          <txt/>
+        </collMode>
+        <sources>
+          <dataSrc/>
+        </sources>
+      </dataColl>
+    </method>
+    <dataAccs>
+      <useStmt>
+        <confDec>None required for research not involving human subjects</confDec>
+      </useStmt>
+    </dataAccs>
+  </stdyDscr>
+  <fileDscr>
+    <fileTxt>
+      <fileType/>
+      <format/>
+    </fileTxt>
+  </fileDscr>
+  <otherMat level="data">
+    <notes/>
+  </otherMat>
+</codeBook>
+
