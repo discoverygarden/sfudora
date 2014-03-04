@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * @file
+ * Tests to see if the hooks get called when appropriate.
+ *
+ * In the test module 'islandora_derivatives_test' there are implementations
+ * of hooks being tested. These implementations modifies the session, and
+ * that's how we test if the hook gets called.
+ *
+ * To make sense of these tests reference islandora_derivatives_test.module.
+ */
+
+class SfudoraDDITransformTestCase extends DrupalUnitTestCase {
+
+  /**
+   * Get Test info.
+   *
+   * @return array
+   *   Properties that are displayed in the test selection form.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Sfudora DDI transform test.',
+      'description' => 'Unit tests for cleanup_ddi.xsl',
+      'group' => 'Islandora',
+    );
+  }
+
+  /**
+   * Performs any pre-requisite tasks that need to happen.
+   */
+  public function setUp() {
+    parent::setUp('sfudora');
+  }
+
+  /**
+   * Test the transform using fixtures.
+   */
+  public function testTransform() {
+    $module_path = drupal_get_path('module', 'sfudora');
+    $fixtures_path = "{$module_path}/tests/fixtures";
+    $schema_path = "{$module_path}/tests/fixtures/DDI/codebook.xsd";
+    $transform_path = "{$module_path}/xml/cleanup_ddi.xsl";
+    // The transform.
+    $transform = new DOMDocument();
+    $transform->load($transform_path);
+    $xslt = new XSLTProcessor();
+    $xslt->importStyleSheet($transform);
+    // Validate the minimal fixture, and transform, see that they documents
+    // match.
+    $minimal_ddi = new DOMDocument();
+    $minimal_ddi->load("{$fixtures_path}/sample_minimal_ddi.xml");
+    if (@$minimal_ddi->schemaValidate($schema_path)) {
+      $this->pass('Minimal DDI fixture is valid.');
+    }
+    else {
+      $this->fail('Minimal DDI fixture is not valid');
+    }
+    $document = $xslt->transformToDoc($minimal_ddi);
+    if (@$document->schemaValidate($schema_path)) {
+     $this->pass('Minimal DDI transformed document is valid.');
+    }
+    else {
+      $this->fail('Minimal DDI transformed document is not valid');
+    }
+    // We don't test if the transformed document matches the Minimal DDI
+    // document as it contains many empty fields that get stripped.
+    $sample_ddi = new DOMDocument();
+    $sample_ddi->load("{$fixtures_path}/sample_ddi.xml");
+    if (@$sample_ddi->schemaValidate($schema_path)) {
+      $this->pass('Sample DDI fixture is valid.');
+    }
+    else {
+      $this->fail('Sample DDI fixture is not valid');
+    }
+    $document = $xslt->transformToDoc($sample_ddi);
+    if (@$document->schemaValidate($schema_path)) {
+      $this->pass('Sample DDI transformed document is valid.');
+    }
+    else {
+      $this->fail('Sample DDI transformed document is not valid');
+    }
+    // We test if the Sample DDI matches the transform as it does not
+    // contain any empty elements that would get stripped.
+    if (@$sample_ddi->C14N() == @$document->C14N()) {
+      $this->pass('Sample DDI transformed matches the transformed document.');
+    }
+    else {
+      $this->fail('Sample DDI transformed does not matche the transformed document.');
+    }
+    // Test that invalid DDI becomes valid.
+   $invalid_ddi = new DOMDocument();
+    $invalid_ddi->load("{$fixtures_path}/sample_invalid_ddi.xml");
+    if (@$invalid_ddi->schemaValidate($schema_path)) {
+      $this->fail('Invalid DDI fixture is valid.');
+    }
+    else {
+      $this->pass('Invalid DDI fixture is invalid');
+    }
+    $document = $xslt->transformToDoc($invalid_ddi);
+    if (@$document->schemaValidate($schema_path)) {
+      $this->pass('Invalid DDI transformed document is valid.');
+    }
+    else {
+      $this->fail('Invalid DDI transformed document is not valid');
+    }
+  }
+}
