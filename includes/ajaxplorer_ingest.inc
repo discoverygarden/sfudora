@@ -856,6 +856,15 @@ function sfudora_ajaxplorer_get_content_model($file) {
         $content_model = "islandora:sp-audioCModel";
       }
       break;
+
+    // Tabular Data.
+    case "text/csv":
+    case "application/vnd.ms-excel":
+    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+      if (isset($enabled_solution_packs['islandora_data'])) {
+        $content_model = "islandora:sp-dataCModel";
+      }
+      break;
   }
 
   return $content_model;
