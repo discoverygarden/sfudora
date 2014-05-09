@@ -204,7 +204,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
         array($form, $form_state)),
     ),
     'title' => t('SFU Ingest'),
-    'init_message' => t('Ingest from Ajaxplorer'),
+    'init_message' => t('Ingest from DataSync'),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
@@ -243,8 +243,8 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
   }
   $form['current_object'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Current objects with the same ajaxplorer file path and repository ID.'),
-    '#description' => t("Select objects to update.  Leave blank to ingest new object."),
+    '#title' => t('Research data exists in the repository with the same file path and ID number. Do you want to update an existing deposit?'),
+    '#description' => t("Select data to update.  Leave blank to ingest new data."),
   );
 
   $form['current_object']['pid_table'] = array(
@@ -300,7 +300,7 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
         array($form, $form_state, $update_list)),
     ),
     'title' => t('SFU Update'),
-    'init_message' => t('Update from Ajaxplorer'),
+    'init_message' => t('Update from DataSync'),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
