@@ -74,7 +74,6 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#options' => array(
       'not_restricted' => t("No restriction"),
       'embargo' => t('Use embargo'),
-      'xacml' => t('Use XACML'),
     ),
   );
 
@@ -862,7 +861,7 @@ function sfudora_ajaxplorer_get_content_model($file) {
     case "application/vnd.ms-excel":
     case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
       if (isset($enabled_solution_packs['islandora_data'])) {
-        $content_model = "islandora:sp-dataCModel";
+        $content_model = "islandora:sp_data";
       }
       break;
   }
