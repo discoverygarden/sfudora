@@ -106,7 +106,7 @@
             <xsl:text> -- </xsl:text>
           </xsl:if>
         </xsl:for-each>
-      <timePrd>
+      </timePrd>
       <xsl:apply-templates select="ddi:collDate"/>
       <xsl:apply-templates select="ddi:geogCover"/>
       <xsl:apply-templates select="ddi:dataKind"/>
