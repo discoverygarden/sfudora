@@ -100,7 +100,7 @@
   <xsl:template match="ddi:sumDscr">
     <xsl:copy>
       <ddi:timePrd>
-      	<xsl:template match="ddi:time*">
+      	<xsl:template match="*[starts-with(name(), 'time')]">
       	  <xsl:value-of select="concat(@value)"/>
           <xsl:if test="not(position()=last())">
             <xsl:text>--</xsl:text>
