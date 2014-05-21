@@ -501,58 +501,52 @@
                   </element>
                   <element name="fundAg">
                     <properties>
-                      <type>markup</type>
+                      <type>tags</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
+                      <description>The agency or agencies who provided funds to support this work.</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
+                      <title>Funding Agency</title>
                       <tree>TRUE</tree>
-                      <actions>
-                        <create>
-                          <path>self::node()</path>
-                          <context>parent</context>
-                          <schema/>
-                          <type>element</type>
-                          <prefix>NULL</prefix>
-                          <value>fundAg</value>
-                        </create>
-                        <read>
-                          <path>codeBook:fundAg</path>
-                          <context>parent</context>
-                        </read>
-                        <update>
-                          <path>self::node()</path>
-                          <context>self</context>
-                        </update>
-                        <delete>NULL</delete>
-                      </actions>
                     </properties>
                     <children>
                       <element name="0">
                         <properties>
-                          <type>select</type>
+                          <type>tag</type>
                           <access>TRUE</access>
+                          <autocomplete_path>taxonomy/autocomplete/field_funders</autocomplete_path>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>The agency or agencies who provided funds to support this work.</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
-                          <options>
-                            <other>Other</other>
-                            <sfu>SFU</sfu>
-                            <cihr>CIHR</cihr>
-                            <nserc>NSERC</nserc>
-                            <sshrc>SSHRC</sshrc>
-                          </options>
-                          <required>TRUE</required>
+                          <required>FALSE</required>
                           <resizable>FALSE</resizable>
-                          <title>Funding Agency</title>
                           <tree>TRUE</tree>
+                          <actions>
+                            <create>
+                              <path>self::node()</path>
+                              <context>parent</context>
+                              <schema/>
+                              <type>element</type>
+                              <prefix>NULL</prefix>
+                              <value>fundAg</value>
+                            </create>
+                            <read>
+                              <path>codeBook:fundAg</path>
+                              <context>parent</context>
+                            </read>
+                            <update>
+                              <path>self::node()</path>
+                              <context>self</context>
+                            </update>
+                            <delete>NULL</delete>
+                          </actions>
                         </properties>
                         <children/>
                       </element>
@@ -1123,7 +1117,7 @@
                           <access>TRUE</access>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>Type of data included in the file, in plain language (e.g. survey data, aggregate data, GIS data, image files) TODO: controlled vocab?</description>
+                          <description>Type of data included in the file, in plain language (e.g. survey data, aggregate data, GIS data)</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
@@ -1137,6 +1131,7 @@
                             <properties>
                               <type>tag</type>
                               <access>TRUE</access>
+                              <autocomplete_path>taxonomy/autocomplete/field_datatype</autocomplete_path>
                               <collapsed>FALSE</collapsed>
                               <collapsible>FALSE</collapsible>
                               <disabled>FALSE</disabled>
