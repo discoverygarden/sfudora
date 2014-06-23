@@ -227,7 +227,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Author or Authors (use the button at right to add more).</description>
+                      <description>Author or Authors (use the button at right to add more). Please follow the convention "Lastname, Given Names."</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -279,7 +279,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>People who aren't considered authors, but still contributed to the work</description>
+                      <description>People who aren't considered authors, but still contributed to the work. Please follow the same Lastname, Given name convention.</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -363,7 +363,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Email address of primary contact</description>
+                      <description>Email address of primary contact&lt;hr/&gt;</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -492,7 +492,7 @@
                           </options>
                           <required>TRUE</required>
                           <resizable>FALSE</resizable>
-                          <title>Copyright</title>
+                          <title>Rights / Licensing</title>
                           <tree>TRUE</tree>
                         </properties>
                         <children/>
@@ -558,7 +558,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>The date on which the data or other research object was created, if relevant.</description>
+                      <description>The date on which the data or other research object was created, if relevant.&lt;hr/&gt;</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -714,7 +714,7 @@
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
-                      <required>FALSE</required>
+                      <required>TRUE</required>
                       <resizable>FALSE</resizable>
                       <title>Keywords</title>
                       <tree>TRUE</tree>
@@ -758,101 +758,52 @@
                   </element>
                   <element name="topcClas">
                     <properties>
-                      <type>markup</type>
+                      <type>tags</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
+                      <description>The academic discipline that the work belongs to</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
+                      <title>Discipline</title>
                       <tree>TRUE</tree>
-                      <actions>
-                        <create>
-                          <path>self::node()</path>
-                          <context>parent</context>
-                          <schema/>
-                          <type>element</type>
-                          <prefix>NULL</prefix>
-                          <value>topcClas</value>
-                        </create>
-                        <read>
-                          <path>codeBook:topcClas</path>
-                          <context>parent</context>
-                        </read>
-                        <update>
-                          <path>self::node()</path>
-                          <context>self</context>
-                        </update>
-                        <delete>NULL</delete>
-                      </actions>
                     </properties>
                     <children>
                       <element name="0">
                         <properties>
-                          <type>select</type>
+                          <type>tag</type>
                           <access>TRUE</access>
+                          <autocomplete_path>taxonomy/autocomplete/field_discipline</autocomplete_path>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>The academic discipline that the work belongs to</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
-                          <options>
-                            <statistics>Actuarial Science and Statistics</statistics>
-                            <anthropology>Anthropology</anthropology>
-                            <archaeology>Archaeology</archaeology>
-                            <asiacanada>Asia-Canada Studies</asiacanada>
-                            <biology>Biological Science</biology>
-                            <biomedphys>Biomedical Physiology and Kinesiology</biomedphys>
-                            <business>Business</business>
-                            <chemistry>Chemistry</chemistry>
-                            <cogsci>Cognitive Science</cogsci>
-                            <communication>Communication</communication>
-                            <compsci>Computing Science</compsci>
-                            <contemporaryarts>Contemporary Arts</contemporaryarts>
-                            <criminology>Criminology</criminology>
-                            <earthscience>Earth Sciences</earthscience>
-                            <economics>Economics</economics>
-                            <education>Education</education>
-                            <engineering>Engineering</engineering>
-                            <english>English</english>
-                            <environmental>Environmental Science</environmental>
-                            <explorations>Explorations</explorations>
-                            <firstnations>First Nations Studies</firstnations>
-                            <french>French</french>
-                            <gender>Gender, Sexuality, and Women's Studies</gender>
-                            <geography>Geography</geography>
-                            <gerontology>Gerontology</gerontology>
-                            <gls>Graduate Liberal Studies</gls>
-                            <hellenic>Hellenic Studies</hellenic>
-                            <history>History</history>
-                            <siat>Interactive Arts and Technology</siat>
-                            <international>International Studies</international>
-                            <labour>Labour Studies</labour>
-                            <languagetraining>Language Training</languagetraining>
-                            <latinamerican>Latin American Studies</latinamerican>
-                            <linguistics>Linguistics</linguistics>
-                            <mathematics>Mathematics</mathematics>
-                            <mechatronic>Mechatronic Systems Engineering</mechatronic>
-                            <molecularbio>Molecular Biology and Biochemistry</molecularbio>
-                            <philosophy>Philosophy</philosophy>
-                            <physics>Physics</physics>
-                            <polisci>Political Science</polisci>
-                            <psychology>Psychology</psychology>
-                            <publicpolicy>Public Policy</publicpolicy>
-                            <publishing>Publishing</publishing>
-                            <resourcemanagement>Resource and Environmental Management</resourcemanagement>
-                            <sociology>Sociology</sociology>
-                            <sustainabledev>Sustainable Community Development</sustainabledev>
-                            <urbanstudies>Urban Studies</urbanstudies>
-                            <worldlit>World Literature</worldlit>
-                          </options>
                           <required>FALSE</required>
                           <resizable>FALSE</resizable>
-                          <title>Discipline</title>
                           <tree>TRUE</tree>
+                          <actions>
+                            <create>
+                              <path>self::node()</path>
+                              <context>parent</context>
+                              <schema/>
+                              <type>element</type>
+                              <prefix>NULL</prefix>
+                              <value>topcClass</value>
+                            </create>
+                            <read>
+                              <path>codeBook:topcClass</path>
+                              <context>parent</context>
+                            </read>
+                            <update>
+                              <path>self::node()</path>
+                              <context>self</context>
+                            </update>
+                            <delete>NULL</delete>
+                          </actions>
                         </properties>
                         <children/>
                       </element>
@@ -1266,7 +1217,7 @@
                           <access>TRUE</access>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>Method used to create research object (e.g. survey, laboratory tool output, etc.)</description>
+                          <description>Method used to create research object (e.g. survey, laboratory tool output, etc.)&lt;hr/&gt;</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
@@ -1575,7 +1526,7 @@
                   <access>TRUE</access>
                   <collapsed>FALSE</collapsed>
                   <collapsible>FALSE</collapsible>
-                  <description>Any clarifying information about the nature of the object itself (e.g. data formatting standards, etc.)</description>
+                  <description>Any clarifying information about the nature of the object itself (e.g. data formatting standards, etc.)&lt;hr/&gt;</description>
                   <disabled>FALSE</disabled>
                   <executes_submit_callback>FALSE</executes_submit_callback>
                   <multiple>FALSE</multiple>
