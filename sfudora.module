@@ -50,7 +50,7 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
   // SFU Generic Content Model.
   $generic_cmodel = $connection->repository->constructObject('sfu:genericCModel');
   $generic_cmodel->owner = 'fedoraAdmin';
-  $generic_cmodel->label = 'Generic file content model for Simon Fraser University';
+  $generic_cmodel->label = 'Islandora Miscellaneous File Format Content Model';
   $generic_cmodel->models = 'fedora-system:ContentModel-3.0';
   $datastream = $generic_cmodel->constructDatastream('DS-COMPOSITE-MODEL', 'X');
   $datastream->label = 'DS-COMPOSITE-MODEL';
