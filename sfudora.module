@@ -74,7 +74,7 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
 function sfudora_ajaxplorer_access_callback() {
   global $user;
 
-  $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:root'));
+  $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:44'));
   return in_array('authenticated user', $user->roles) && islandora_object_access(ISLANDORA_INGEST, $object, $user);
 }
 
