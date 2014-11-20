@@ -347,7 +347,7 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
  */
 function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operations) {
   if ($success) {
-    $root_collection = variable_get('sfudora_repository_pid', 'islandora:44');
+    $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
     drupal_goto('islandora');
   }
 }
@@ -388,7 +388,7 @@ function sfudora_ajaxplorer_update_object_batch($form, $form_state, $update_list
  */
 function sfudora_ajaxplorer_update_object_finished($success, $results, $operations) {
   if ($success) {
-    $root_collection = variable_get('sfudora_repository_pid', 'islandora:44');
+    $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
     drupal_goto('islandora');
   }
 }
@@ -673,7 +673,7 @@ function sfudora_ajaxplorer_get_folder_data($file_data, &$context) {
   }
 
   $count = $zip->numFiles;
-  $root_collection = variable_get('sfudora_repository_pid', 'islandora:44');
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
 
   $files_info = array();
   $collections_info = array();
@@ -720,7 +720,7 @@ function sfudora_ajaxplorer_get_file_data($params, $file_path, &$context) {
 
   $file = drupal_realpath($file_path);
 
-  $root_collection = variable_get('sfudora_repository_pid', 'islandora:44');
+  $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
 
   $files_info = array();
   $file_entry = new stdClass();
