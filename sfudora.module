@@ -96,7 +96,7 @@ function sfudora_islandora_xml_form_builder_forms() {
 function sfudora_islandora_content_model_forms_form_associations() {
   return array(
     'sfudora_generic_form' => array(
-      'content_model' => 'sfu:genericCModel',
+      'content_model' => 'islandora:binaryObjectCModel',
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr', 'citation', 'titlStmt', 'titl'),

@@ -409,7 +409,7 @@ function sfudora_ajaxplorer_update_object_finished($success, $results, $operatio
 function sfudora_ajaxplorer_ingest_single_object(&$form, &$form_state, $file_info, $result) {
   module_load_include('inc', 'islandora', 'includes/utilities');
 
-  $parent_collection = variable_get('sfudora_repository_pid', 'islandora:44');
+  $parent_collection = variable_get('sfudora_repository_pid', 'islandora:root');
   // If the parent collection is not sfudora root then find the pid of the
   // parent collection.
   if (isset($file_info->parent_collection) && $file_info->parent_collection != $parent_collection) {
@@ -806,7 +806,7 @@ function sfudora_ajaxplorer_get_content_model($file) {
   $enabled_solution_packs = module_invoke_all('islandora_required_objects', $connection);
 
   // Set generic default content model.
-  $content_model = "sfu:genericCModel";
+  $content_model = "islandora:binaryObjectCModel";
 
   switch ($mimetype) {
     // Basic Image.
@@ -858,6 +858,7 @@ function sfudora_ajaxplorer_get_content_model($file) {
 
     // Tabular Data.
     case "text/csv":
+    case "application/x-spss-sav":
     case "application/vnd.ms-excel":
     case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
       if (isset($enabled_solution_packs['islandora_data'])) {
