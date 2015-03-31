@@ -19,16 +19,125 @@
   <xsl:template match="codeBook">
     <xsl:param name="prefix">ddi.</xsl:param>
     <xsl:param name="suffix"></xsl:param>
-    <!-- Create fields for the set of selected elements, named according to the 'local-name' and containing the 'text' -->
-    <xsl:for-each select="./*">
 
-      <field>
-        <xsl:attribute name="name">
-          <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
-        </xsl:attribute>
-        <xsl:value-of select="text()"/>
-      </field>
-    </xsl:for-each>
+<!-- SFUdora DDI subset -->
+
+  <xsl:for-each select="//codeBook:citation/codeBook:titlStmt/codeBook:titl[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:citation/codeBook:titlStmt/codeBook:IDNo[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:citation/codeBook:rspStmt/codeBook:AuthEnty[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:citation/codeBook:rspStmt/codeBook:othId[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:citation/codeBook:prodStmt/codeBook:prodDate[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:stdyInfo/codeBook:subject/codeBook:keyword[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:stdyInfo/codeBook:abstract[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:stdyInfo/codeBook:sumDscr/codeBook:geogCover[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:stdyInfo/codeBook:sumDscr/codeBook:timePrd[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:stdyInfo/codeBook:sumDscr/codeBook:dataKind[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:method/codeBook:dataColl/codeBook:sources/codeBook:dataSrc[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:dataAccs/codeBook:useStmt/codeBook:restrctn[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
+
+  <xsl:for-each select="//codeBook:otherMat/codeBook:notes[normalize-space(text())]">
+    <field>
+      <xsl:attribute name="name">
+        <xsl:value-of select="concat($prefix, local-name(), $suffix)"/>
+      </xsl:attribute>
+      <xsl:value-of select="text()"/>
+    </field>
+  </xsl:for-each>
 
   </xsl:template>
 
