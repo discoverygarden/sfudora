@@ -74,7 +74,6 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#options' => array(
       'not_restricted' => t("No restriction"),
       'embargo' => t('Use embargo'),
-      'xacml' => t('Use XACML'),
     ),
   );
 
@@ -95,7 +94,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#default_value' => 'indefinite',
   );
   $form['embargo_date'] = array(
-    '#type' => 'datepicker',
+    '#type' => 'date_popup',
     '#title' => t('Embargo date'),
     '#description' => t('The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)'),
     '#states' => array(
@@ -205,7 +204,7 @@ function sfudora_ajaxplorer_ingest_form_submit(&$form, &$form_state) {
         array($form, $form_state)),
     ),
     'title' => t('SFU Ingest'),
-    'init_message' => t('Ingest from Ajaxplorer'),
+    'init_message' => t('Ingest from DataSync'),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
@@ -244,8 +243,8 @@ function sfudora_ajaxplorer_update_form($form, &$form_state, $params) {
   }
   $form['current_object'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Current objects with the same ajaxplorer file path and repository ID.'),
-    '#description' => t("Select objects to update.  Leave blank to ingest new object."),
+    '#title' => t('Research data exists in the repository with the same file path and ID number. Do you want to update an existing deposit?'),
+    '#description' => t("Select data to update.  Leave blank to ingest new data."),
   );
 
   $form['current_object']['pid_table'] = array(
@@ -301,7 +300,7 @@ function sfudora_ajaxplorer_update_form_submit(&$form, &$form_state) {
         array($form, $form_state, $update_list)),
     ),
     'title' => t('SFU Update'),
-    'init_message' => t('Update from Ajaxplorer'),
+    'init_message' => t('Update from DataSync'),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'sfudora') . '/includes/ajaxplorer_ingest.inc',
@@ -349,7 +348,7 @@ function sfudora_ajaxplorer_ingest_object_batch($form, $form_state, &$context) {
 function sfudora_ajaxplorer_ingest_object_finished($success, $results, $operations) {
   if ($success) {
     $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
-    drupal_goto('sfudora/ajaxplorer');
+    drupal_goto('islandora');
   }
 }
 
@@ -390,7 +389,7 @@ function sfudora_ajaxplorer_update_object_batch($form, $form_state, $update_list
 function sfudora_ajaxplorer_update_object_finished($success, $results, $operations) {
   if ($success) {
     $root_collection = variable_get('sfudora_repository_pid', 'islandora:root');
-    drupal_goto('sfudora/ajaxplorer');
+    drupal_goto('islandora');
   }
 }
 
@@ -807,7 +806,7 @@ function sfudora_ajaxplorer_get_content_model($file) {
   $enabled_solution_packs = module_invoke_all('islandora_required_objects', $connection);
 
   // Set generic default content model.
-  $content_model = "sfu:genericCModel";
+  $content_model = "islandora:binaryObjectCModel";
 
   switch ($mimetype) {
     // Basic Image.
@@ -854,6 +853,16 @@ function sfudora_ajaxplorer_get_content_model($file) {
     case "audio/flac":
       if (isset($enabled_solution_packs['islandora_audio'])) {
         $content_model = "islandora:sp-audioCModel";
+      }
+      break;
+
+    // Tabular Data.
+    case "text/csv":
+    case "application/x-spss-sav":
+    case "application/vnd.ms-excel":
+    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+      if (isset($enabled_solution_packs['islandora_data'])) {
+        $content_model = "islandora:sp_data";
       }
       break;
   }

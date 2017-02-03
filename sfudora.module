@@ -50,7 +50,7 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
   // SFU Generic Content Model.
   $generic_cmodel = $connection->repository->constructObject('sfu:genericCModel');
   $generic_cmodel->owner = 'fedoraAdmin';
-  $generic_cmodel->label = 'Generic file content model for Simon Fraser University';
+  $generic_cmodel->label = 'Islandora Miscellaneous File Format Content Model';
   $generic_cmodel->models = 'fedora-system:ContentModel-3.0';
   $datastream = $generic_cmodel->constructDatastream('DS-COMPOSITE-MODEL', 'X');
   $datastream->label = 'DS-COMPOSITE-MODEL';
@@ -74,7 +74,7 @@ function sfudora_islandora_required_objects(IslandoraTuque $connection) {
 function sfudora_ajaxplorer_access_callback() {
   global $user;
 
-  $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:root'));
+  $object = islandora_object_load(variable_get('sfudora_repository_pid', 'islandora:44'));
   return in_array('authenticated user', $user->roles) && islandora_object_access(ISLANDORA_INGEST, $object, $user);
 }
 
@@ -96,7 +96,7 @@ function sfudora_islandora_xml_form_builder_forms() {
 function sfudora_islandora_content_model_forms_form_associations() {
   return array(
     'sfudora_generic_form' => array(
-      'content_model' => 'sfu:genericCModel',
+      'content_model' => 'islandora:binaryObjectCModel',
       'form_name' => 'SFU DDI form',
       'dsid' => 'DDI',
       'title_field' => array('stdyDscr', 'citation', 'titlStmt', 'titl'),
@@ -149,16 +149,25 @@ function sfudora_islandora_content_model_forms_form_associations() {
       'self_transform' => 'cleanup_ddi.xsl',
       'template' => FALSE,
     ),
+    'sfudora_data_form' => array(
+      'content_model' => 'islandora:sp_data',
+      'form_name' => 'SFU DDI form',
+      'dsid' => 'DDI',
+      'title_field' => array('stdyDscr', 'citation', 'titlStmt', 'titl'),
+      'transform' => 'ddi_to_dc.xsl',
+      'self_transform' => 'cleanup_ddi.xsl',
+      'template' => FALSE,
+    ),
   );
-}
-
-/**
- * Implements hook_islandora_xml_form_builder_get_transforms().
- */
-function sfudora_islandora_xml_form_builder_get_transforms() {
-  $module_path = drupal_get_path('module', 'sfudora');
-  return array(
-    'ddi_to_dc.xsl' => "$module_path/xml/ddi_to_dc.xsl",
+ }
+ 
+ /**
+  * Implements hook_islandora_xml_form_builder_get_transforms().
+  */
+ function sfudora_islandora_xml_form_builder_get_transforms() {
+   $module_path = drupal_get_path('module', 'sfudora');
+   return array(
+     'ddi_to_dc.xsl' => "$module_path/xml/ddi_to_dc.xsl",
   );
 }
 

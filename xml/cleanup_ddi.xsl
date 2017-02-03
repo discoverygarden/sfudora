@@ -99,7 +99,14 @@
   <!-- Reorder ddi:sumDscr child elements -->
   <xsl:template match="ddi:sumDscr">
     <xsl:copy>
-      <xsl:apply-templates select="ddi:timePrd"/>
+      <timePrd>
+      	<xsl:for-each select="*[starts-with(name(), 'time')]">
+      	  <xsl:value-of select="string(.)"/>
+          <xsl:if test="not(position()=last())">
+            <xsl:text> -- </xsl:text>
+          </xsl:if>
+        </xsl:for-each>
+      </timePrd>
       <xsl:apply-templates select="ddi:collDate"/>
       <xsl:apply-templates select="ddi:geogCover"/>
       <xsl:apply-templates select="ddi:dataKind"/>

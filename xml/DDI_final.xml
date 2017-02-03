@@ -159,6 +159,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
+                      <description>Your given name for the object you're depositing.</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -187,61 +188,6 @@
                       </actions>
                     </properties>
                     <children/>
-                  </element>
-                  <element name="IDNo">
-                    <properties>
-                      <type>tags</type>
-                      <access>TRUE</access>
-                      <collapsed>FALSE</collapsed>
-                      <collapsible>FALSE</collapsible>
-                      <description>Unique number assigned to dataset or project</description>
-                      <disabled>FALSE</disabled>
-                      <executes_submit_callback>FALSE</executes_submit_callback>
-                      <multiple>FALSE</multiple>
-                      <required>FALSE</required>
-                      <resizable>FALSE</resizable>
-                      <title>Identification Number</title>
-                      <tree>TRUE</tree>
-                    </properties>
-                    <children>
-                      <element name="0">
-                        <properties>
-                          <type>tag</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                              <schema/>
-                              <type>element</type>
-                              <prefix>NULL</prefix>
-                              <value>IDNo</value>
-                            </create>
-                            <read>
-                              <path>codeBook:IDNo</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
                   </element>
                 </children>
               </element>
@@ -281,7 +227,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Primary Investigator</description>
+                      <description>Author or Authors (use the button at right to add more). Please follow the convention "Lastname, Given Names."</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -320,10 +266,7 @@
                               <path>self::node()</path>
                               <context>self</context>
                             </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
+                            <delete>NULL</delete>
                           </actions>
                         </properties>
                         <children/>
@@ -336,7 +279,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Indicate the persons or bodies connected with the work not already named elsewhere</description>
+                      <description>People who aren't considered authors, but still contributed to the work. Please follow the same convention.</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -375,244 +318,7 @@
                               <path>self::node()</path>
                               <context>self</context>
                             </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
-                  </element>
-                </children>
-              </element>
-              <element name="prodStmt">
-                <properties>
-                  <type>markup</type>
-                  <access>TRUE</access>
-                  <collapsed>FALSE</collapsed>
-                  <collapsible>FALSE</collapsible>
-                  <disabled>FALSE</disabled>
-                  <executes_submit_callback>FALSE</executes_submit_callback>
-                  <multiple>FALSE</multiple>
-                  <required>FALSE</required>
-                  <resizable>FALSE</resizable>
-                  <tree>TRUE</tree>
-                  <actions>
-                    <create>
-                      <path>self::node()</path>
-                      <context>parent</context>
-                      <schema/>
-                      <type>element</type>
-                      <prefix>NULL</prefix>
-                      <value>prodStmt</value>
-                    </create>
-                    <read>
-                      <path>codeBook:prodStmt</path>
-                      <context>parent</context>
-                    </read>
-                    <update>NULL</update>
-                    <delete>NULL</delete>
-                  </actions>
-                </properties>
-                <children>
-                  <element name="copyright">
-                    <properties>
-                      <type>textfield</type>
-                      <access>TRUE</access>
-                      <collapsed>FALSE</collapsed>
-                      <collapsible>FALSE</collapsible>
-                      <default_value>Default to cc license selection</default_value>
-                      <description>Copyright statement</description>
-                      <disabled>FALSE</disabled>
-                      <executes_submit_callback>FALSE</executes_submit_callback>
-                      <multiple>FALSE</multiple>
-                      <required>FALSE</required>
-                      <resizable>FALSE</resizable>
-                      <title>Copyright</title>
-                      <tree>TRUE</tree>
-                      <actions>
-                        <create>
-                          <path>self::node()</path>
-                          <context>parent</context>
-                          <schema/>
-                          <type>element</type>
-                          <prefix>NULL</prefix>
-                          <value>copyright</value>
-                        </create>
-                        <read>
-                          <path>codeBook:copyright</path>
-                          <context>parent</context>
-                        </read>
-                        <update>
-                          <path>self::node()</path>
-                          <context>self</context>
-                        </update>
-                        <delete>NULL</delete>
-                      </actions>
-                    </properties>
-                    <children/>
-                  </element>
-                  <element name="prodDate">
-                    <properties>
-                      <type>tags</type>
-                      <access>TRUE</access>
-                      <collapsed>FALSE</collapsed>
-                      <collapsible>FALSE</collapsible>
-                      <description>Date the material was produced</description>
-                      <disabled>FALSE</disabled>
-                      <executes_submit_callback>FALSE</executes_submit_callback>
-                      <multiple>FALSE</multiple>
-                      <required>FALSE</required>
-                      <resizable>FALSE</resizable>
-                      <title>Production Date</title>
-                      <tree>TRUE</tree>
-                    </properties>
-                    <children>
-                      <element name="0">
-                        <properties>
-                          <type>tag</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                              <schema/>
-                              <type>element</type>
-                              <prefix>NULL</prefix>
-                              <value>prodDate</value>
-                            </create>
-                            <read>
-                              <path>codeBook:prodDate</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
-                  </element>
-                  <element name="software">
-                    <properties>
-                      <type>tags</type>
-                      <access>TRUE</access>
-                      <collapsed>FALSE</collapsed>
-                      <collapsible>FALSE</collapsible>
-                      <description>Software used to produce the material</description>
-                      <disabled>FALSE</disabled>
-                      <executes_submit_callback>FALSE</executes_submit_callback>
-                      <multiple>FALSE</multiple>
-                      <required>FALSE</required>
-                      <resizable>FALSE</resizable>
-                      <title>Software</title>
-                      <tree>TRUE</tree>
-                    </properties>
-                    <children>
-                      <element name="0">
-                        <properties>
-                          <type>tag</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                              <schema/>
-                              <type>element</type>
-                              <prefix>NULL</prefix>
-                              <value>software</value>
-                            </create>
-                            <read>
-                              <path>codeBook:software</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
-                  </element>
-                  <element name="fundAg">
-                    <properties>
-                      <type>tags</type>
-                      <access>TRUE</access>
-                      <collapsed>FALSE</collapsed>
-                      <collapsible>FALSE</collapsible>
-                      <description>Funding Agency/Sponsor Description. The source(s) of funds for production of the work. You may enter "N/A".</description>
-                      <disabled>FALSE</disabled>
-                      <executes_submit_callback>FALSE</executes_submit_callback>
-                      <multiple>FALSE</multiple>
-                      <required>TRUE</required>
-                      <resizable>FALSE</resizable>
-                      <title>Funding Agency</title>
-                      <tree>TRUE</tree>
-                    </properties>
-                    <children>
-                      <element name="0">
-                        <properties>
-                          <type>tag</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                              <schema/>
-                              <type>element</type>
-                              <prefix>NULL</prefix>
-                              <value>fundAg</value>
-                            </create>
-                            <read>
-                              <path>codeBook:fundAg</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
+                            <delete>NULL</delete>
                           </actions>
                         </properties>
                         <children/>
@@ -657,7 +363,7 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Names and addresses of individuals responsible for the work</description>
+                      <description>Email address of primary contact&lt;hr/&gt;</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
@@ -696,10 +402,7 @@
                               <path>self::node()</path>
                               <context>self</context>
                             </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
+                            <delete>NULL</delete>
                           </actions>
                         </properties>
                         <children/>
@@ -708,7 +411,7 @@
                   </element>
                 </children>
               </element>
-              <element name="verStmt">
+              <element name="prodStmt">
                 <properties>
                   <type>markup</type>
                   <access>TRUE</access>
@@ -727,10 +430,10 @@
                       <schema/>
                       <type>element</type>
                       <prefix>NULL</prefix>
-                      <value>verStmt</value>
+                      <value>prodStmt</value>
                     </create>
                     <read>
-                      <path>codeBook:verStmt</path>
+                      <path>codeBook:prodStmt</path>
                       <context>parent</context>
                     </read>
                     <update>NULL</update>
@@ -738,19 +441,17 @@
                   </actions>
                 </properties>
                 <children>
-                  <element name="version">
+                  <element name="copyright">
                     <properties>
-                      <type>textfield</type>
+                      <type>markup</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Release, or edition </description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
-                      <title>Version</title>
                       <tree>TRUE</tree>
                       <actions>
                         <create>
@@ -759,10 +460,125 @@
                           <schema/>
                           <type>element</type>
                           <prefix>NULL</prefix>
-                          <value>version</value>
+                          <value>copyright</value>
                         </create>
                         <read>
-                          <path>codeBook:version</path>
+                          <path>codeBook:copyright</path>
+                          <context>parent</context>
+                        </read>
+                        <update>
+                          <path>self::node()</path>
+                          <context>self</context>
+                        </update>
+                        <delete>NULL</delete>
+                      </actions>
+                    </properties>
+                    <children>
+                      <element name="0">
+                        <properties>
+                          <type>select</type>
+                          <access>TRUE</access>
+                          <collapsed>FALSE</collapsed>
+                          <collapsible>FALSE</collapsible>
+                          <description>Select a copyright license. Note that this does not directly affect embargo or permissions to view your research, which can be changed later.
+
+&lt;b&gt;While you always retain ownership of any content deposited into SFU's Research Data Repository, by selecting a license for your content you hereby grant stewardship of the content to Simon Fraser University Library under terms which can be viewed from &lt;a href="http://researchdata.sfu.ca/node/4"&gt;here&lt;/a&gt;.&lt;/b&gt;</description>
+                          <disabled>FALSE</disabled>
+                          <executes_submit_callback>FALSE</executes_submit_callback>
+                          <multiple>FALSE</multiple>
+                          <options>
+                            <index key="cc-zero">Creative Commons Zero -- waive all rights and place work in public domain.</index>
+                            <index key="cc-by-nd">Creative Commons Attribution-NoDerivatives 4.0 -- allows free use with attribution.</index>
+                            <index key="cc-by">Creative Commons Attribution 4.0 (CC BY) -- allows others to make derivative works.</index>
+                            <index key="non-CC">Do not apply a Creative Commons license; deposited object remains proprietary</index>
+                          </options>
+                          <required>TRUE</required>
+                          <resizable>FALSE</resizable>
+                          <title>Rights / Licensing</title>
+                          <tree>TRUE</tree>
+                        </properties>
+                        <children/>
+                      </element>
+                    </children>
+                  </element>
+                  <element name="fundAg">
+                    <properties>
+                      <type>tags</type>
+                      <access>TRUE</access>
+                      <collapsed>FALSE</collapsed>
+                      <collapsible>FALSE</collapsible>
+                      <description>The agency or agencies who provided funds to support this work.</description>
+                      <disabled>FALSE</disabled>
+                      <executes_submit_callback>FALSE</executes_submit_callback>
+                      <multiple>FALSE</multiple>
+                      <required>FALSE</required>
+                      <resizable>FALSE</resizable>
+                      <title>Funding Agency</title>
+                      <tree>TRUE</tree>
+                    </properties>
+                    <children>
+                      <element name="0">
+                        <properties>
+                          <type>tag</type>
+                          <access>TRUE</access>
+                          <autocomplete_path>taxonomy/autocomplete/field_funders</autocomplete_path>
+                          <collapsed>FALSE</collapsed>
+                          <collapsible>FALSE</collapsible>
+                          <disabled>FALSE</disabled>
+                          <executes_submit_callback>FALSE</executes_submit_callback>
+                          <multiple>FALSE</multiple>
+                          <required>FALSE</required>
+                          <resizable>FALSE</resizable>
+                          <tree>TRUE</tree>
+                          <actions>
+                            <create>
+                              <path>self::node()</path>
+                              <context>parent</context>
+                              <schema/>
+                              <type>element</type>
+                              <prefix>NULL</prefix>
+                              <value>fundAg</value>
+                            </create>
+                            <read>
+                              <path>codeBook:fundAg</path>
+                              <context>parent</context>
+                            </read>
+                            <update>
+                              <path>self::node()</path>
+                              <context>self</context>
+                            </update>
+                            <delete>NULL</delete>
+                          </actions>
+                        </properties>
+                        <children/>
+                      </element>
+                    </children>
+                  </element>
+                  <element name="prodDate">
+                    <properties>
+                      <type>datepicker</type>
+                      <access>TRUE</access>
+                      <collapsed>FALSE</collapsed>
+                      <collapsible>FALSE</collapsible>
+                      <description>The date on which the data or other research object was created or published.&lt;hr/&gt;</description>
+                      <disabled>FALSE</disabled>
+                      <executes_submit_callback>FALSE</executes_submit_callback>
+                      <multiple>FALSE</multiple>
+                      <required>TRUE</required>
+                      <resizable>FALSE</resizable>
+                      <title>Production Date</title>
+                      <tree>TRUE</tree>
+                      <actions>
+                        <create>
+                          <path>self::node()</path>
+                          <context>parent</context>
+                          <schema/>
+                          <type>element</type>
+                          <prefix>NULL</prefix>
+                          <value>prodDate</value>
+                        </create>
+                        <read>
+                          <path>codeBook:prodDate</path>
                           <context>parent</context>
                         </read>
                         <update>
@@ -774,95 +590,57 @@
                     </properties>
                     <children/>
                   </element>
-                </children>
-              </element>
-              <element name="biblCit">
-                <properties>
-                  <type>textfield</type>
-                  <access>TRUE</access>
-                  <collapsed>FALSE</collapsed>
-                  <collapsible>FALSE</collapsible>
-                  <disabled>FALSE</disabled>
-                  <executes_submit_callback>FALSE</executes_submit_callback>
-                  <multiple>FALSE</multiple>
-                  <required>FALSE</required>
-                  <resizable>FALSE</resizable>
-                  <title>Bibliographical Citation</title>
-                  <tree>TRUE</tree>
-                  <actions>
-                    <create>
-                      <path>self::node()</path>
-                      <context>parent</context>
-                      <schema/>
-                      <type>element</type>
-                      <prefix>NULL</prefix>
-                      <value>biblCit</value>
-                    </create>
-                    <read>
-                      <path>codeBook:biblCit</path>
-                      <context>document</context>
-                    </read>
-                    <update>
-                      <path>self::node()</path>
-                      <context>self</context>
-                    </update>
-                    <delete>NULL</delete>
-                  </actions>
-                </properties>
-                <children/>
-              </element>
-              <element name="notes">
-                <properties>
-                  <type>tags</type>
-                  <access>TRUE</access>
-                  <collapsed>FALSE</collapsed>
-                  <collapsible>FALSE</collapsible>
-                  <description>Further information</description>
-                  <disabled>FALSE</disabled>
-                  <executes_submit_callback>FALSE</executes_submit_callback>
-                  <multiple>FALSE</multiple>
-                  <required>FALSE</required>
-                  <resizable>FALSE</resizable>
-                  <title>Additional Information</title>
-                  <tree>TRUE</tree>
-                </properties>
-                <children>
-                  <element name="0">
+                  <element name="software">
                     <properties>
-                      <type>tag</type>
+                      <type>tags</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
+                      <description>If a particular software platform was needed to produce and/or view this data, please list it here.</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
+                      <title>Software</title>
                       <tree>TRUE</tree>
-                      <actions>
-                        <create>
-                          <path>self::node()</path>
-                          <context>parent</context>
-                          <schema/>
-                          <type>element</type>
-                          <prefix>NULL</prefix>
-                          <value>notes</value>
-                        </create>
-                        <read>
-                          <path>codeBook:notes</path>
-                          <context>parent</context>
-                        </read>
-                        <update>
-                          <path>self::node()</path>
-                          <context>self</context>
-                        </update>
-                        <delete>
-                          <path>self::node()</path>
-                          <context>self</context>
-                        </delete>
-                      </actions>
                     </properties>
-                    <children/>
+                    <children>
+                      <element name="0">
+                        <properties>
+                          <type>tag</type>
+                          <access>TRUE</access>
+                          <collapsed>FALSE</collapsed>
+                          <collapsible>FALSE</collapsible>
+                          <disabled>FALSE</disabled>
+                          <executes_submit_callback>FALSE</executes_submit_callback>
+                          <multiple>FALSE</multiple>
+                          <required>FALSE</required>
+                          <resizable>FALSE</resizable>
+                          <tree>TRUE</tree>
+                          <actions>
+                            <create>
+                              <path>self::node()</path>
+                              <context>parent</context>
+                              <schema/>
+                              <type>element</type>
+                              <prefix>NULL</prefix>
+                              <value>software</value>
+                            </create>
+                            <read>
+                              <path>codeBook:software</path>
+                              <context>parent</context>
+                            </read>
+                            <update>
+                              <path>self::node()</path>
+                              <context>self</context>
+                            </update>
+                            <delete>NULL</delete>
+                          </actions>
+                        </properties>
+                        <children/>
+                      </element>
+                    </children>
                   </element>
                 </children>
               </element>
@@ -934,12 +712,13 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
+                      <description>Keywords that describe the object (one per textfield, use the button at right to add more).</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
-                      <required>FALSE</required>
+                      <required>TRUE</required>
                       <resizable>FALSE</resizable>
-                      <title>Subject</title>
+                      <title>Keywords</title>
                       <tree>TRUE</tree>
                     </properties>
                     <children>
@@ -972,10 +751,7 @@
                               <path>self::node()</path>
                               <context>self</context>
                             </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
+                            <delete>NULL</delete>
                           </actions>
                         </properties>
                         <children/>
@@ -988,13 +764,13 @@
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Discipline based classification</description>
+                      <description>The academic discipline that the work belongs to</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
-                      <title>Topic Classification</title>
+                      <title>Discipline</title>
                       <tree>TRUE</tree>
                     </properties>
                     <children>
@@ -1002,6 +778,7 @@
                         <properties>
                           <type>tag</type>
                           <access>TRUE</access>
+                          <autocomplete_path>taxonomy/autocomplete/field_discipline</autocomplete_path>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
                           <disabled>FALSE</disabled>
@@ -1017,97 +794,15 @@
                               <schema/>
                               <type>element</type>
                               <prefix>NULL</prefix>
-                              <value>topcClas</value>
+                              <value>topcClass</value>
                             </create>
                             <read>
-                              <path>codeBook:topcClas</path>
+                              <path>codeBook:topcClass</path>
                               <context>parent</context>
                             </read>
                             <update>
                               <path>self::node()</path>
                               <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
-                  </element>
-                </children>
-              </element>
-              <element name="abstracts">
-                <properties>
-                  <type>tabs</type>
-                  <access>TRUE</access>
-                  <collapsed>FALSE</collapsed>
-                  <collapsible>FALSE</collapsible>
-                  <disabled>FALSE</disabled>
-                  <executes_submit_callback>FALSE</executes_submit_callback>
-                  <multiple>FALSE</multiple>
-                  <required>TRUE</required>
-                  <resizable>FALSE</resizable>
-                  <tree>TRUE</tree>
-                </properties>
-                <children>
-                  <element name="0">
-                    <properties>
-                      <type>tabpanel</type>
-                      <access>TRUE</access>
-                      <collapsed>FALSE</collapsed>
-                      <collapsible>FALSE</collapsible>
-                      <disabled>FALSE</disabled>
-                      <executes_submit_callback>FALSE</executes_submit_callback>
-                      <multiple>FALSE</multiple>
-                      <required>FALSE</required>
-                      <resizable>FALSE</resizable>
-                      <tree>TRUE</tree>
-                      <actions>
-                        <create>
-                          <path>self::node()</path>
-                          <context>parent</context>
-                          <schema/>
-                          <type>element</type>
-                          <prefix>NULL</prefix>
-                          <value>abstract</value>
-                        </create>
-                        <read>
-                          <path>codeBook:abstract</path>
-                          <context>parent</context>
-                        </read>
-                        <update>NULL</update>
-                        <delete>
-                          <path>self::node()</path>
-                          <context>self</context>
-                        </delete>
-                      </actions>
-                    </properties>
-                    <children>
-                      <element name="abstract">
-                        <properties>
-                          <type>textarea</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <title>Abstract</title>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>NULL</create>
-                            <read>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>parent</context>
                             </update>
                             <delete>NULL</delete>
                           </actions>
@@ -1117,6 +812,42 @@
                     </children>
                   </element>
                 </children>
+              </element>
+              <element name="abstract">
+                <properties>
+                  <type>textarea</type>
+                  <access>TRUE</access>
+                  <collapsed>FALSE</collapsed>
+                  <collapsible>FALSE</collapsible>
+                  <disabled>FALSE</disabled>
+                  <executes_submit_callback>FALSE</executes_submit_callback>
+                  <maxlength>2500</maxlength>
+                  <multiple>FALSE</multiple>
+                  <required>FALSE</required>
+                  <resizable>FALSE</resizable>
+                  <title>Abstract</title>
+                  <tree>TRUE</tree>
+                  <actions>
+                    <create>
+                      <path>self::node()</path>
+                      <context>parent</context>
+                      <schema/>
+                      <type>element</type>
+                      <prefix>NULL</prefix>
+                      <value>abstract</value>
+                    </create>
+                    <read>
+                      <path>codeBook:abstract</path>
+                      <context>parent</context>
+                    </read>
+                    <update>
+                      <path>self::node()</path>
+                      <context>self</context>
+                    </update>
+                    <delete>NULL</delete>
+                  </actions>
+                </properties>
+                <children/>
               </element>
               <element name="sumDscr">
                 <properties>
@@ -1150,113 +881,74 @@
                 <children>
                   <element name="timePrd">
                     <properties>
-                      <type>tags</type>
+                      <type>datepicker</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>The time period to which the data refer</description>
+                      <description>Start date</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
-                      <title>Time Period</title>
+                      <title>Coverage Period</title>
                       <tree>TRUE</tree>
+                      <actions>
+                        <create>
+                          <path>self::node()</path>
+                          <context>parent</context>
+                          <schema/>
+                          <type>element</type>
+                          <prefix>NULL</prefix>
+                          <value>timePrd</value>
+                        </create>
+                        <read>
+                          <path>codeBook:timePrd</path>
+                          <context>parent</context>
+                        </read>
+                        <update>
+                          <path>self::node()</path>
+                          <context>self</context>
+                        </update>
+                        <delete>NULL</delete>
+                      </actions>
                     </properties>
-                    <children>
-                      <element name="0">
-                        <properties>
-                          <type>tag</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                              <schema/>
-                              <type>element</type>
-                              <prefix>NULL</prefix>
-                              <value>timePrd</value>
-                            </create>
-                            <read>
-                              <path>codeBook:timePrd</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
+                    <children/>
                   </element>
-                  <element name="collDate">
+                  <element name="timeEnd">
                     <properties>
-                      <type>tags</type>
+                      <type>datepicker</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
-                      <description>Data collection date(s) (YYYY-MM-DD)</description>
+                      <description>End Date</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
                       <multiple>FALSE</multiple>
                       <required>FALSE</required>
                       <resizable>FALSE</resizable>
-                      <title>Collection Date</title>
                       <tree>TRUE</tree>
+                      <actions>
+                        <create>
+                          <path>self::node()</path>
+                          <context>parent</context>
+                          <schema/>
+                          <type>element</type>
+                          <prefix>NULL</prefix>
+                          <value>timeEnd</value>
+                        </create>
+                        <read>
+                          <path>codeBook:timeEnd</path>
+                          <context>parent</context>
+                        </read>
+                        <update>
+                          <path>self::node()</path>
+                          <context>self</context>
+                        </update>
+                        <delete>NULL</delete>
+                      </actions>
                     </properties>
-                    <children>
-                      <element name="0">
-                        <properties>
-                          <type>tag</type>
-                          <access>TRUE</access>
-                          <collapsed>FALSE</collapsed>
-                          <collapsible>FALSE</collapsible>
-                          <disabled>FALSE</disabled>
-                          <executes_submit_callback>FALSE</executes_submit_callback>
-                          <multiple>FALSE</multiple>
-                          <required>FALSE</required>
-                          <resizable>FALSE</resizable>
-                          <tree>TRUE</tree>
-                          <actions>
-                            <create>
-                              <path>self::node()</path>
-                              <context>parent</context>
-                              <schema/>
-                              <type>element</type>
-                              <prefix>NULL</prefix>
-                              <value>collDate</value>
-                            </create>
-                            <read>
-                              <path>codeBook:collDate</path>
-                              <context>parent</context>
-                            </read>
-                            <update>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </update>
-                            <delete>
-                              <path>self::node()</path>
-                              <context>self</context>
-                            </delete>
-                          </actions>
-                        </properties>
-                        <children/>
-                      </element>
-                    </children>
+                    <children/>
                   </element>
                   <element name="geogCover">
                     <properties>
@@ -1294,7 +986,7 @@
                           <access>TRUE</access>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>Geographic Coverage Description Information on the geographic coverage of the data.</description>
+                          <description>Geographic coverage of the object, if relevant.</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
@@ -1333,10 +1025,7 @@
                                   <path>self::node()</path>
                                   <context>self</context>
                                 </update>
-                                <delete>
-                                  <path>self::node()</path>
-                                  <context>self</context>
-                                </delete>
+                                <delete>NULL</delete>
                               </actions>
                             </properties>
                             <children/>
@@ -1381,7 +1070,7 @@
                           <access>TRUE</access>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>Type of data included in the file (e.g. survey data, aggregate data, GIS data, image files)</description>
+                          <description>Type of data included in the file, in plain language (e.g. survey data, aggregate data, GIS data)</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
@@ -1395,6 +1084,7 @@
                             <properties>
                               <type>tag</type>
                               <access>TRUE</access>
+                              <autocomplete_path>taxonomy/autocomplete/field_datatype</autocomplete_path>
                               <collapsed>FALSE</collapsed>
                               <collapsible>FALSE</collapsible>
                               <disabled>FALSE</disabled>
@@ -1420,10 +1110,7 @@
                                   <path>self::node()</path>
                                   <context>self</context>
                                 </update>
-                                <delete>
-                                  <path>self::node()</path>
-                                  <context>self</context>
-                                </delete>
+                                <delete>NULL</delete>
                               </actions>
                             </properties>
                             <children/>
@@ -1532,7 +1219,7 @@
                           <access>TRUE</access>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>Method used to collect the data and instrumentation characteristics</description>
+                          <description>Method used to create research object (e.g. survey, laboratory tool output, etc.)&lt;hr/&gt;</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
@@ -1544,7 +1231,7 @@
                         <children>
                           <element name="0">
                             <properties>
-                              <type>tag</type>
+                              <type>textfield</type>
                               <access>TRUE</access>
                               <collapsed>FALSE</collapsed>
                               <collapsible>FALSE</collapsible>
@@ -1571,10 +1258,7 @@
                                   <path>self::node()</path>
                                   <context>self</context>
                                 </update>
-                                <delete>
-                                  <path>self::node()</path>
-                                  <context>self</context>
-                                </delete>
+                                <delete>NULL</delete>
                               </actions>
                             </properties>
                             <children/>
@@ -1613,13 +1297,13 @@
                       </actions>
                     </properties>
                     <children>
-                      <element name="dataSrc">
+                      <element name="sources">
                         <properties>
                           <type>tags</type>
                           <access>TRUE</access>
                           <collapsed>FALSE</collapsed>
                           <collapsible>FALSE</collapsible>
-                          <description>Description of sources used for the data collection</description>
+                          <description>Description of sources used in creation of research object (e.g. population surveyed)</description>
                           <disabled>FALSE</disabled>
                           <executes_submit_callback>FALSE</executes_submit_callback>
                           <multiple>FALSE</multiple>
@@ -1648,20 +1332,17 @@
                                   <schema/>
                                   <type>element</type>
                                   <prefix>NULL</prefix>
-                                  <value>dataSrc</value>
+                                  <value>sources</value>
                                 </create>
                                 <read>
-                                  <path>codeBook:dataSrc</path>
+                                  <path>codeBook:sources</path>
                                   <context>parent</context>
                                 </read>
                                 <update>
                                   <path>self::node()</path>
                                   <context>self</context>
                                 </update>
-                                <delete>
-                                  <path>self::node()</path>
-                                  <context>self</context>
-                                </delete>
+                                <delete>NULL</delete>
                               </actions>
                             </properties>
                             <children/>
@@ -1739,14 +1420,15 @@
                 <children>
                   <element name="confDec">
                     <properties>
-                      <type>textfield</type>
+                      <type>textarea</type>
                       <access>TRUE</access>
                       <collapsed>FALSE</collapsed>
                       <collapsible>FALSE</collapsible>
                       <default_value>None required for research not involving human subjects</default_value>
-                      <description>Is a confidentiality declaration needed to access this dataset? Default value may be replaced if it does not apply.</description>
+                      <description>How was confidentiality obtained for research involving human subjects?</description>
                       <disabled>FALSE</disabled>
                       <executes_submit_callback>FALSE</executes_submit_callback>
+                      <maxlength>2500</maxlength>
                       <multiple>FALSE</multiple>
                       <required>TRUE</required>
                       <resizable>FALSE</resizable>
@@ -1840,49 +1522,13 @@
               </actions>
             </properties>
             <children>
-              <element name="fileType">
-                <properties>
-                  <type>textfield</type>
-                  <access>TRUE</access>
-                  <collapsed>FALSE</collapsed>
-                  <collapsible>FALSE</collapsible>
-                  <description>File description such as ASCII, EBCDIIC, etc. and software-dependendent files such as SAS datasets, SPSS export files, etc.</description>
-                  <disabled>FALSE</disabled>
-                  <executes_submit_callback>FALSE</executes_submit_callback>
-                  <multiple>FALSE</multiple>
-                  <required>FALSE</required>
-                  <resizable>FALSE</resizable>
-                  <title>File Type</title>
-                  <tree>TRUE</tree>
-                  <actions>
-                    <create>
-                      <path>self::node()</path>
-                      <context>parent</context>
-                      <schema/>
-                      <type>element</type>
-                      <prefix>NULL</prefix>
-                      <value>fileType</value>
-                    </create>
-                    <read>
-                      <path>codeBook:fileType</path>
-                      <context>parent</context>
-                    </read>
-                    <update>
-                      <path>self::node()</path>
-                      <context>self</context>
-                    </update>
-                    <delete>NULL</delete>
-                  </actions>
-                </properties>
-                <children/>
-              </element>
               <element name="format">
                 <properties>
                   <type>textfield</type>
                   <access>TRUE</access>
                   <collapsed>FALSE</collapsed>
                   <collapsible>FALSE</collapsible>
-                  <description>Data Format Description. Physical format of the data file.</description>
+                  <description>Any clarifying information about the nature of the object itself (e.g. data formatting standards, etc.)&lt;hr/&gt;</description>
                   <disabled>FALSE</disabled>
                   <executes_submit_callback>FALSE</executes_submit_callback>
                   <multiple>FALSE</multiple>
@@ -1952,14 +1598,17 @@
               <access>TRUE</access>
               <collapsed>FALSE</collapsed>
               <collapsible>FALSE</collapsible>
-              <description>Other related materials such as appendices, sampling information, weighting details, methodological and technical details, related publications, etc.</description>
+              <description>Please provide links to any relevant accompanying materials (e.g. the research article that data accompanies).</description>
               <disabled>FALSE</disabled>
               <executes_submit_callback>FALSE</executes_submit_callback>
               <multiple>FALSE</multiple>
               <required>FALSE</required>
               <resizable>FALSE</resizable>
-              <title>Other Materials</title>
+              <title>Related published content</title>
               <tree>TRUE</tree>
+              <validate>
+                <index key="0"/>
+              </validate>
             </properties>
             <children>
               <element name="0">
@@ -1991,10 +1640,7 @@
                       <path>self::node()</path>
                       <context>self</context>
                     </update>
-                    <delete>
-                      <path>self::node()</path>
-                      <context>self</context>
-                    </delete>
+                    <delete>NULL</delete>
                   </actions>
                 </properties>
                 <children/>
