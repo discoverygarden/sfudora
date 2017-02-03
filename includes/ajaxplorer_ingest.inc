@@ -94,7 +94,7 @@ function sfudora_ajaxplorer_ingest_form($form, &$form_state, $params) {
     '#default_value' => 'indefinite',
   );
   $form['embargo_date'] = array(
-    '#type' => 'datepicker',
+    '#type' => 'date_popup',
     '#title' => t('Embargo date'),
     '#description' => t('The date until which this item should be embargoed (we will check with you on this date to confirm that it is ready for release)'),
     '#states' => array(
